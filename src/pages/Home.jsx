@@ -8,6 +8,7 @@ import FlipClock from '../components/FlipClock';
 import TicketCard from '../components/TicketCard';
 import SpeakerCard from '../components/SpeakerCard';
 import Lanyard from '../components/Lanyard';
+import MusicPlayer from '../components/MusicPlayer.jsx'
 
 import { events, FEST } from '../data/events';
 import { speakers } from '../data/speakers';
@@ -66,48 +67,48 @@ export default function Home() {
       {/* ─── HERO ─── */}
       <section style={styles.heroSection}>
         {/* Background Layers */}
-        <div 
+        <div
           style={{
-            position: 'absolute', inset: 0, 
-            backgroundImage: "url('/backgroundimage.jpeg')", 
+            position: 'absolute', inset: 0,
+            backgroundImage: "url('/backgroundimage.jpeg')",
             backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
             opacity: 0.35, zIndex: 0
-          }} 
-          aria-hidden="true" 
+          }}
+          aria-hidden="true"
         />
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1 }} aria-hidden="true" />
         <div style={{ position: 'absolute', inset: 0, opacity: 0.4, backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '56px 56px', zIndex: 1 }} aria-hidden="true" />
-        
+
         {/* Hero Content */}
         <div style={styles.heroContent}>
-          <motion.p 
+          <motion.p
             initial="hidden" animate="visible" variants={revealText}
             style={styles.heroEyebrow}
           >
             {FEST.dates} · {FEST.venue}
           </motion.p>
-          
-          <motion.h1 
+
+          <motion.h1
             initial="hidden" animate="visible" variants={revealText}
             style={styles.heroTitle}
           >
             {FEST.name}
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial="hidden" animate="visible" variants={revealText}
             style={styles.heroTagline}
           >
             Two days of building, breaking and shipping. A hackathon, a stage,<br />
             a lab and a leaderboard — all under one roof.
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             initial="hidden" animate="visible" variants={revealText}
             style={styles.heroCtaWrap}
           >
-            <Link 
-              to="/register" 
+            <Link
+              to="/register"
               onClick={triggerRegisterSlide}
               className="stamp-cta"
               style={{
@@ -201,8 +202,10 @@ export default function Home() {
               </StaggerItem>
             ))}
           </StaggerGroup>
+
         </section>
 
+        <MusicPlayer />
         {/* ─── SCHEDULE ─── */}
         <section>
           <RevealText>
@@ -242,6 +245,8 @@ export default function Home() {
             </div>
           </RevealBreath>
         </section>
+
+
 
         {/* ─── SPONSORS ─── */}
         <section>

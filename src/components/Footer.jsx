@@ -1,53 +1,26 @@
 // src/components/Footer.jsx
-import { Link } from 'react-router-dom';
 import { FEST } from '../data/events';
-
-const links = [
-  { to: "/", label: "Home" },
-  { to: "/events", label: "Events" },
-  { to: "/talks", label: "Tech Talks" },
-  { to: "/sponsors", label: "Sponsors" },
-  { to: "/team", label: "Team" },
-  { to: "/register", label: "Register" },
-];
 
 export default function Footer() {
   return (
     <footer style={styles.footer}>
+      {/* Dark overlay for text readability over the background image */}
+      <div style={styles.overlay}></div>
+
       <div style={styles.container}>
-        <div style={styles.grid} className="footer-grid">
-          {/* Brand & Details */}
-          <div>
+        <div style={styles.flexContainer} className="footer-flex">
+          {/* Brand & Details (Left) */}
+          <div style={styles.leftCol}>
             <h3 style={styles.brand}>{FEST.name}</h3>
-            <p style={styles.textMuted}>{FEST.tagline}</p>
-            <p style={{ ...styles.textMuted, marginTop: '1rem' }}>
+            <p style={{ ...styles.textMuted, marginTop: '1rem', fontSize: '0.875rem' }}>
               {FEST.dates}
               <br />
               {FEST.venue}
             </p>
           </div>
-          
-          {/* Explore Links */}
-          <div style={styles.col}>
-            <h4 style={styles.heading}>Explore</h4>
-            <ul style={styles.list}>
-              {links.map((l) => (
-                <li key={l.to}>
-                  <Link to={l.to} style={styles.link} className="hover-cyan">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <Link to="/admin" style={styles.link} className="hover-cyan">
-                  Organiser login
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          {/* Contact Details */}
-          <div style={styles.col}>
+
+          {/* Contact Details (Right) */}
+          <div style={styles.rightCol}>
             <h4 style={styles.heading}>Contact</h4>
             <p style={{ ...styles.textMuted, marginTop: '0.75rem' }}>hello@techadrishta.in</p>
             <p style={{ ...styles.textMuted, marginTop: '0.25rem' }}>UPI: techadrishta@upi</p>
@@ -58,17 +31,18 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        
+
         <p style={styles.copyright}>
           © 2026 {FEST.name}. Built for people who ship.
         </p>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .hover-cyan { transition: color 0.2s; }
         .hover-cyan:hover { color: #22d3ee !important; }
-        @media (min-width: 640px) {
-          .footer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+        @media (max-width: 640px) {
+          .footer-flex { flex-direction: column !important; gap: 2.5rem; }
         }
       `}} />
     </footer>
@@ -77,60 +51,66 @@ export default function Footer() {
 
 const styles = {
   footer: {
-    borderTop: '1px solid rgba(255,255,255,0.06)',
+    position: 'relative',
+    backgroundImage: 'url(/footer1.jpeg)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    borderTop: 'none',
+  },
+  overlay: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: 'rgba(0,0,0,0.80)', // Dark overlay for white text readability
+    zIndex: 0,
   },
   container: {
+    position: 'relative',
+    zIndex: 1,
     margin: '0 auto',
-    maxWidth: '72rem',
-    padding: '3rem 1.25rem 0',
+    width: '100%',
+    padding: '4rem 2rem 0',
   },
-  grid: {
-    display: 'grid',
-    gap: '2rem',
+  flexContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
     paddingBottom: '3rem',
-    gridTemplateColumns: '1fr',
+  },
+  leftCol: {
+    maxWidth: '400px',
+  },
+  rightCol: {
+    maxWidth: '400px',
   },
   brand: {
-    fontSize: '1.125rem',
+    fontSize: '1.25rem',
     fontWeight: 800,
     color: '#fff',
     fontFamily: "'Space Grotesk', ui-sans-serif, system-ui, sans-serif",
+    textTransform: 'uppercase',
   },
   textMuted: {
     fontSize: '0.875rem',
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(255,255,255,0.7)',
     marginTop: '0.5rem',
-  },
-  col: {
-    fontSize: '0.875rem',
+    lineHeight: 1.5,
   },
   heading: {
-    fontSize: '0.875rem',
-    fontWeight: 600,
+    fontSize: '1rem',
+    fontWeight: 700,
     color: '#fff',
-  },
-  list: {
-    marginTop: '0.75rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-    listStyle: 'none',
-    color: 'rgba(255,255,255,0.6)',
-  },
-  link: {
-    color: 'inherit',
-    textDecoration: 'none',
+    marginBottom: '1rem',
   },
   socials: {
-    marginTop: '1rem',
+    marginTop: '1.5rem',
     display: 'flex',
-    gap: '0.75rem',
-    color: 'rgba(255,255,255,0.6)',
+    gap: '1rem',
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '0.875rem',
   },
   copyright: {
     paddingBottom: '2rem',
     textAlign: 'center',
     fontSize: '0.75rem',
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(255,255,255,0.5)',
   },
 };

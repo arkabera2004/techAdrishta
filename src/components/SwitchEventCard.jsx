@@ -70,8 +70,8 @@ export default function SwitchEventCard() {
     const prevPage = () => setPage((p) => Math.max(p - 1, 0));
 
     return (
-        <div className="w-full max-w-3xl mx-auto">
-            <svg viewBox="0 0 1000 480" className="w-full h-auto">
+        <div className="w-full mx-auto" style={{ width: '100vw', maxWidth: '100%', overflow: 'hidden', padding: '0 1rem' }}>
+            <svg viewBox="0 0 1000 480" className="w-full h-auto" style={{ display: 'block', margin: '0 auto' }}>
                 <defs>
                     <linearGradient id="blueJoycon" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" stopColor="#007994" />

@@ -202,39 +202,11 @@ export default function Home() {
           paddingTop: '2rem'
         }}
       >
-        <div style={styles.contentWrap}>
-          {/* ─── ABOUT ─── */}
-        <section style={styles.gridSection}>
-          {/* <div>
-            <RevealText>
-              <h2 className="section-title">About the event</h2>
-            </RevealText>
-            <RevealBreath delay={0.1}>
-              <p style={styles.textMuted}>
-                TECH ADRISHTA started as a dorm-room hackathon and grew into the largest independent
-                tech fest in the region. Two days, four tracks, and a single rule: everything you
-                present has to actually run.
-              </p>
-            </RevealBreath>
-            <RevealBreath delay={0.2}>
-              <p style={{ ...styles.textMuted, marginTop: '1rem' }}>
-                Expect engiers who ship at scale, founders mid-raise, and security researchers who
-                break things on stage. No keynote fluff.
-              </p>
-            </RevealBreath>
-          </div>
-          <RevealBreath delay={0.3} style={styles.glassPanel}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem' }}>Four tracks</h3>
-            <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem', color: 'rgba(255,255,255,0.65)', listStyle: 'none' }}>
-              <li><strong style={{ color: '#fff' }}>Build</strong> — 36-hour hackathon with hardware and cloud credits.</li>
-              <li><strong style={{ color: '#fff' }}>Learn</strong> — hands-on workshops capped at 60 seats.</li>
-              <li><strong style={{ color: '#fff' }}>Listen</strong> — talks from people running production systems.</li>
-              <li><strong style={{ color: '#fff' }}>Compete</strong> — CTF, pitch arena and the gaming bracket.</li>
-            </ul>
-          </RevealBreath> */}
+        <div style={{ width: '100%', overflow: 'hidden', padding: '2rem 0 5rem 0' }}>
           <SwitchEventCard />
-        </section>
-
+        </div>
+        
+        <div style={styles.contentWrap}>
         {/* ─── FEATURED TICKETS ─── */}
         <section>
           <div style={{ 

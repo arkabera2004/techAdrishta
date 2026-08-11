@@ -1,7 +1,7 @@
 // src/pages/Home.jsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 
 import FlipClock from '../components/FlipClock';
@@ -52,10 +52,55 @@ const staggerContainer = {
   }
 };
 
+/* ─── Helper Component for Sticky Tickets ─── */
+function StickyTicket({ event, index, baseTilt }) {
+  const ref = useRef(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", `start ${160 + index * 24}px`]
+  });
+  
+  const rotate = useTransform(scrollYProgress, [0, 1], [baseTilt, 0]);
+  
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'sticky',
+        top: `calc(160px + ${index * 24}px)`,
+        zIndex: index + 10,
+      }}
+    >
+      <motion.div style={{ rotate, transformOrigin: 'center center' }}>
+        <TicketCard event={event} tilt={0} />
+      </motion.div>
+    </div>
+  );
+}
+
 /* ─── Page Component ─── */
 export default function Home() {
   const [schedDay, setSchedDay] = useState('day1');
   const [openFaq, setOpenFaq] = useState(null);
+
+  const panelARef = useRef(null);
+  const { scrollYProgress: panelAProgress } = useScroll({
+    target: panelARef,
+    offset: ["start end", "start top"]
+  });
+  const heroScale = useTransform(panelAProgress, [0, 1], [1, 0.97]);
+  const heroOpacity = useTransform(panelAProgress, [0, 1], [1, 0.75]);
+  const heroY = useTransform(panelAProgress, [0, 1], ["0px", "-20px"]);
+
+  const panelBRef = useRef(null);
+  const { scrollYProgress: panelBProgress } = useScroll({
+    target: panelBRef,
+    offset: ["start end", "start top"]
+  });
+  const speakerScale = useTransform(panelBProgress, [0, 1], [1, 0.97]);
+  const speakerOpacity = useTransform(panelBProgress, [0, 1], [1, 0.75]);
+  const speakerY = useTransform(panelBProgress, [0, 1], ["0px", "-20px"]);
 
   const featuredEvents = events.slice(0, 3);
   const topSpeakers = speakers.slice(0, 4);
@@ -65,9 +110,11 @@ export default function Home() {
   }
 
   return (
-    <main style={{ paddingTop: 0 }}>
-      {/* ─── HERO ─── */}
-      <section style={styles.heroSection}>
+    <main style={{ backgroundColor: '#000', paddingTop: 0 }}>
+      {/* ─── HERO (Sticky Layer) ─── */}
+      <section style={{ position: 'sticky', top: 0, minHeight: '100dvh', zIndex: 0, display: 'flex', flexDirection: 'column' }}>
+        <motion.div style={{ scale: heroScale, opacity: heroOpacity, y: heroY, flex: 1, display: 'flex', flexDirection: 'column', transformOrigin: 'center top' }}>
+          <section style={styles.heroSection}>
         {/* Background Layers */}
         <div
           style={{
@@ -138,10 +185,25 @@ export default function Home() {
             <FlipClock />
           </motion.div>
         </div>
+          </section>
+        </motion.div>
       </section>
 
-      <div style={styles.contentWrap}>
-        {/* ─── ABOUT ─── */}
+      {/* ─── PANEL A (Foreground Layer) ─── */}
+      <section 
+        ref={panelARef}
+        style={{ 
+          position: 'relative', 
+          zIndex: 10, 
+          backgroundColor: 'var(--bg)', 
+          borderTopLeftRadius: '32px', 
+          borderTopRightRadius: '32px', 
+          boxShadow: '0 -20px 40px rgba(0,0,0,0.5)',
+          paddingTop: '2rem'
+        }}
+      >
+        <div style={styles.contentWrap}>
+          {/* ─── ABOUT ─── */}
         <section style={styles.gridSection}>
           {/* <div>
             <RevealText>
@@ -199,35 +261,30 @@ export default function Home() {
           <div style={{ paddingBottom: '2.5rem', paddingTop: '2rem' }}>
             <div style={{ display: 'flex', width: '100%', flexDirection: 'column', gap: '5rem' }}>
               {featuredEvents.map((ev, i) => (
-                <div
-                  key={ev.id}
-                  style={{
-                    position: 'sticky',
-                    top: `calc(160px + ${i * 24}px)`,
-                    zIndex: i + 10,
-                  }}
-                >
-                  <TicketCard event={ev} tilt={[-1.5, 1, -1][i] ?? 0} />
-                </div>
+                <StickyTicket key={ev.id} event={ev} index={i} baseTilt={[-1.5, 1, -1][i] ?? 0} />
               ))}
             </div>
           </div>
         </section>
       </div>
+      </section>
 
-      {/* ─── SPEAKERS ─── */}
-      <section style={{
-        position: 'relative',
-        width: '100%',
-        margin: 0,
-        padding: 0,
-        aspectRatio: '1600 / 785',
-        backgroundImage: "url('/speakerbackground.png')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'top center',
-        backgroundRepeat: 'no-repeat',
-        overflow: 'hidden',
-      }}>
+      {/* ─── SPEAKERS (Sticky Layer) ─── */}
+      <section style={{ position: 'sticky', top: 0, minHeight: '100dvh', zIndex: 0, display: 'flex', flexDirection: 'column', backgroundColor: '#000', marginTop: '-100vh', marginBottom: '100vh' }}>
+        <motion.div style={{ scale: speakerScale, opacity: speakerOpacity, y: speakerY, flex: 1, display: 'flex', flexDirection: 'column', transformOrigin: 'center top' }}>
+          <section style={{
+            position: 'relative',
+            width: '100%',
+            flex: 1,
+            margin: 0,
+            padding: 0,
+            minHeight: '100dvh',
+            backgroundImage: "url('/speakerbackground.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'no-repeat',
+            overflow: 'hidden',
+          }}>
         {/* MusicPlayer — far left of stage */}
         <div style={{
           position: 'absolute',
@@ -414,10 +471,25 @@ export default function Home() {
             }}
           />
         </div>
+          </section>
+        </motion.div>
       </section>
 
-      <div style={styles.contentWrap}>
-        {/* ─── SCHEDULE ─── */}
+      {/* ─── PANEL B (Foreground Layer) ─── */}
+      <section 
+        ref={panelBRef}
+        style={{ 
+          position: 'relative', 
+          zIndex: 10, 
+          backgroundColor: 'var(--bg)', 
+          borderTopLeftRadius: '32px', 
+          borderTopRightRadius: '32px', 
+          boxShadow: '0 -20px 40px rgba(0,0,0,0.5)',
+          paddingTop: '2rem'
+        }}
+      >
+        <div style={styles.contentWrap}>
+          {/* ─── SCHEDULE ─── */}
         <section>
           <RevealText>
             <h2 className="section-title">Schedule</h2>
@@ -511,6 +583,7 @@ export default function Home() {
           </RevealBreath>
         </section>
       </div>
+      </section>
     </main>
   );
 }
@@ -531,7 +604,9 @@ const iconBtnStyle = {
 const styles = {
   heroSection: {
     position: 'relative',
-    height: '100svh',
+    minHeight: '100dvh',
+    display: 'flex',
+    flexDirection: 'column',
     overflow: 'hidden',
   },
   heroContent: {
@@ -539,7 +614,8 @@ const styles = {
     zIndex: 10,
     margin: '0 auto',
     display: 'flex',
-    height: '100%',
+    flex: 1,
+    width: '100%',
     maxWidth: '72rem',
     flexDirection: 'column',
     alignItems: 'center',

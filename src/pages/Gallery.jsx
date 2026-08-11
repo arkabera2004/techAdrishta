@@ -1,16 +1,26 @@
-// src/pages/Gallery.jsx
+import { useState, useEffect } from 'react';
 import DomeGallery from '../components/DomeGallery';
 import RetroTV from '../components/RetroTV';
 
 export default function Gallery() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <main style={styles.page}>
       <div style={{ height: '100svh', width: '100%' }}>
         <DomeGallery
-          fit={0.8}
-          minRadius={600}
+          fit={isMobile ? 1.0 : 0.8}
+          minRadius={isMobile ? 350 : 600}
           maxVerticalRotationDeg={0}
-          segments={34}
+          segments={isMobile ? 24 : 34}
+          tileInset={isMobile ? "-10px 30px" : "10px"}
           dragDampening={2}
           grayscale={true}
         />

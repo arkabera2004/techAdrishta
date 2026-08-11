@@ -122,7 +122,8 @@ export default function DomeGallery({
   openedImageHeight = '350px',
   imageBorderRadius = '30px',
   openedImageBorderRadius = '30px',
-  grayscale = true
+  grayscale = true,
+  tileInset = '10px'
 }) {
   const rootRef = useRef(null);
   const mainRef = useRef(null);
@@ -251,8 +252,31 @@ export default function DomeGallery({
     openedImageHeight
   ]);
 
+  const autoRotateRAF = useRef(null);
+
   useEffect(() => {
     applyTransform(rotationRef.current.x, rotationRef.current.y);
+    
+    let lastTime = performance.now();
+    const rotateStep = (time) => {
+      autoRotateRAF.current = requestAnimationFrame(rotateStep);
+      const delta = time - lastTime;
+      lastTime = time;
+      
+      if (draggingRef.current || inertiaRAF.current || focusedElRef.current || openingRef.current) {
+        return;
+      }
+      
+      const speed = 0.008; // degrees per ms
+      const nextY = wrapAngleSigned(rotationRef.current.y + delta * speed);
+      rotationRef.current.y = nextY;
+      applyTransform(rotationRef.current.x, nextY);
+    };
+    
+    autoRotateRAF.current = requestAnimationFrame(rotateStep);
+    return () => {
+      if (autoRotateRAF.current) cancelAnimationFrame(autoRotateRAF.current);
+    };
   }, []);
 
   const stopInertia = useCallback(() => {
@@ -598,6 +622,7 @@ export default function DomeGallery({
         ['--segments-y']: segments,
         ['--overlay-blur-color']: overlayBlurColor,
         ['--tile-radius']: imageBorderRadius,
+        ['--tile-inset']: tileInset,
         ['--enlarge-radius']: openedImageBorderRadius,
         ['--image-filter']: grayscale ? 'grayscale(1)' : 'none'
       }}

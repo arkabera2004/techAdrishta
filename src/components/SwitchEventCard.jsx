@@ -73,35 +73,58 @@ export default function SwitchEventCard() {
         <div className="w-full max-w-3xl mx-auto">
             <svg viewBox="0 0 1000 480" className="w-full h-auto">
                 <defs>
-                    <linearGradient id="blueJoycon" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#4d8fe0" />
-                        <stop offset="45%" stopColor="#2f68b8" />
-                        <stop offset="100%" stopColor="#1c4788" />
+                    <linearGradient id="blueJoycon" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#007994" />
+                        <stop offset="12%" stopColor="#00c3e3" />
+                        <stop offset="88%" stopColor="#00c3e3" />
+                        <stop offset="100%" stopColor="#00a1bc" />
                     </linearGradient>
-                    <linearGradient id="redJoycon" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#f66850" />
-                        <stop offset="45%" stopColor="#dd402a" />
-                        <stop offset="100%" stopColor="#b02717" />
+                    <linearGradient id="redJoycon" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#d13542" />
+                        <stop offset="12%" stopColor="#ff4554" />
+                        <stop offset="88%" stopColor="#ff4554" />
+                        <stop offset="100%" stopColor="#c32d39" />
                     </linearGradient>
                     <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#2b2b2d" />
-                        <stop offset="100%" stopColor="#151516" />
+                        <stop offset="0%" stopColor="#38383a" />
+                        <stop offset="100%" stopColor="#1c1c1e" />
                     </linearGradient>
                     <linearGradient id="sheen" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="rgba(255,255,255,0.22)" />
-                        <stop offset="18%" stopColor="rgba(255,255,255,0)" />
+                        <stop offset="0%" stopColor="rgba(255,255,255,0.25)" />
+                        <stop offset="15%" stopColor="rgba(255,255,255,0)" />
                     </linearGradient>
+                    <linearGradient id="buttonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#3a3a3c" />
+                        <stop offset="100%" stopColor="#141415" />
+                    </linearGradient>
+                    <radialGradient id="thumbstickBase" cx="50%" cy="50%" r="50%">
+                        <stop offset="60%" stopColor="#1c1c1e" />
+                        <stop offset="100%" stopColor="#0a0a0a" />
+                    </radialGradient>
+                    <radialGradient id="thumbstickCap" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#1c1c1e" />
+                        <stop offset="80%" stopColor="#303033" />
+                        <stop offset="100%" stopColor="#0f0f10" />
+                    </radialGradient>
                     <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="160%">
-                        <feDropShadow dx="0" dy="14" stdDeviation="18" floodColor="#000" floodOpacity="0.28" />
+                        <feDropShadow dx="0" dy="16" stdDeviation="24" floodColor="#000" floodOpacity="0.4" />
+                    </filter>
+                    <filter id="buttonShadow" x="-30%" y="-30%" width="160%" height="160%">
+                        <feDropShadow dx="0" dy="2.5" stdDeviation="1.5" floodColor="#000" floodOpacity="0.75" />
                     </filter>
                     <filter id="innerShadow" x="-20%" y="-20%" width="140%" height="140%">
                         <feOffset dx="0" dy="2" />
                         <feGaussianBlur stdDeviation="3" result="offset-blur" />
                         <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse" />
-                        <feFlood floodColor="#000" floodOpacity="0.55" result="color" />
+                        <feFlood floodColor="#000" floodOpacity="0.7" result="color" />
                         <feComposite operator="in" in="color" in2="inverse" result="shadow" />
                         <feComposite operator="over" in="shadow" in2="SourceGraphic" />
                     </filter>
+                    <linearGradient id="screenGlare" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="rgba(255,255,255,0.08)" />
+                        <stop offset="40%" stopColor="rgba(255,255,255,0)" />
+                        <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+                    </linearGradient>
                 </defs>
 
                 <g filter="url(#dropShadow)">
@@ -128,38 +151,38 @@ export default function SwitchEventCard() {
                     <rect x="151" y="150" width="6" height="34" rx="3" fill="rgba(0,0,0,0.35)" />
 
                     {/* thumbstick */}
-                    <circle cx="97" cy="98" r="40" fill="#0e0e0f" />
-                    <circle cx="97" cy="98" r="40" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
-                    <circle cx="97" cy="98" r="31" fill="#2c2c2e" />
-                    <circle cx="97" cy="98" r="31" fill="url(#sheen)" opacity="0.5" />
+                    <circle cx="97" cy="98" r="40" fill="url(#thumbstickBase)" filter="url(#buttonShadow)" />
+                    <circle cx="97" cy="98" r="40" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2" />
+                    <circle cx="97" cy="98" r="30" fill="url(#thumbstickCap)" />
+                    <circle cx="97" cy="98" r="30" fill="none" stroke="#000" strokeWidth="1" opacity="0.3" />
 
                     {/* D-pad: four individual button caps */}
-                    <g>
+                    <g filter="url(#buttonShadow)">
                         {/* up */}
                         <rect
                             x="80" y="188" width="34" height="34" rx="8"
-                            fill={pressed === "up" ? "#5a9ae6" : "#0e0e0f"}
+                            fill={pressed === "up" ? "#5a9ae6" : "url(#buttonGrad)"}
                             onPointerDown={() => press("up", () => scrollBy(-70))}
                             style={{ cursor: "pointer" }}
                         />
                         {/* left */}
                         <rect 
                             x="46" y="222" width="34" height="34" rx="8" 
-                            fill={pressed === "left" ? "#5a9ae6" : "#0e0e0f"}
+                            fill={pressed === "left" ? "#5a9ae6" : "url(#buttonGrad)"}
                             onPointerDown={() => press("left", prevPage)}
                             style={{ cursor: "pointer" }}
                         />
                         {/* right */}
                         <rect 
                             x="114" y="222" width="34" height="34" rx="8" 
-                            fill={pressed === "right" ? "#5a9ae6" : "#0e0e0f"}
+                            fill={pressed === "right" ? "#5a9ae6" : "url(#buttonGrad)"}
                             onPointerDown={() => press("right", nextPage)}
                             style={{ cursor: "pointer" }}
                         />
                         {/* down */}
                         <rect
                             x="80" y="256" width="34" height="34" rx="8"
-                            fill={pressed === "down" ? "#5a9ae6" : "#0e0e0f"}
+                            fill={pressed === "down" ? "#5a9ae6" : "url(#buttonGrad)"}
                             onPointerDown={() => press("down", () => scrollBy(70))}
                             style={{ cursor: "pointer" }}
                         />
@@ -196,13 +219,13 @@ export default function SwitchEventCard() {
                                 <div className="w-full h-full flex flex-col justify-center items-start text-left p-6 animate-in fade-in duration-300">
                                     <h2
                                         className="text-white mb-6 tracking-wide"
-                                        style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "24px", lineHeight: "1.6" }}
+                                        style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "28px", lineHeight: "1.6" }}
                                     >
                                         {EVENT.heading}
                                     </h2>
 
                                     {EVENT.paragraphs.map((p, i) => (
-                                        <p key={i} className="text-[20px] leading-relaxed mb-5 text-gray-300 max-w-[500px]">
+                                        <p key={i} className="text-[23px] leading-relaxed mb-5 text-gray-300 max-w-[560px]">
                                             {p}
                                         </p>
                                     ))}
@@ -223,13 +246,13 @@ export default function SwitchEventCard() {
                                     <div className="border border-gray-600 rounded-lg px-6 py-6 bg-white/5 shadow-lg">
                                         <div
                                             className="text-white mb-6 text-center"
-                                            style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "16px" }}
+                                            style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "24px" }}
                                         >
                                             {EVENT.tracksTitle}
                                         </div>
                                         <ul className="space-y-4">
                                             {EVENT.tracks.map((t) => (
-                                                <li key={t.name} className="text-[19px] leading-snug text-gray-300">
+                                                <li key={t.name} className="text-[22px] leading-snug text-gray-300">
                                                     <span className="text-white font-bold">{t.name}</span> — {t.desc}
                                                 </li>
                                             ))}
@@ -248,6 +271,9 @@ export default function SwitchEventCard() {
                             )}
                         </div>
                     </foreignObject>
+
+                    {/* screen glare overlay */}
+                    <rect x="215" y="46" width="570" height="388" rx="20" fill="url(#screenGlare)" pointerEvents="none" />
 
                     {/* ================= RIGHT JOY-CON (red) ================= */}
                     <path
@@ -278,21 +304,21 @@ export default function SwitchEventCard() {
 
                     {/* ABXY diamond */}
                     <g fontFamily="sans-serif" fontSize="16" fontWeight="700" fill="#e8e8ea" textAnchor="middle">
-                        <circle cx="922" cy="182" r="19" fill="#0e0e0f" />
+                        <circle cx="922" cy="182" r="19" fill="url(#buttonGrad)" filter="url(#buttonShadow)" />
                         <text x="922" y="188">X</text>
-                        <circle cx="968" cy="228" r="19" fill="#0e0e0f" />
+                        <circle cx="968" cy="228" r="19" fill="url(#buttonGrad)" filter="url(#buttonShadow)" />
                         <text x="968" y="234">A</text>
-                        <circle cx="876" cy="228" r="19" fill="#0e0e0f" />
+                        <circle cx="876" cy="228" r="19" fill="url(#buttonGrad)" filter="url(#buttonShadow)" />
                         <text x="876" y="234">Y</text>
-                        <circle cx="922" cy="274" r="19" fill="#0e0e0f" />
+                        <circle cx="922" cy="274" r="19" fill="url(#buttonGrad)" filter="url(#buttonShadow)" />
                         <text x="922" y="280">B</text>
                     </g>
 
                     {/* thumbstick */}
-                    <circle cx="922" cy="366" r="40" fill="#0e0e0f" />
-                    <circle cx="922" cy="366" r="40" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
-                    <circle cx="922" cy="366" r="31" fill="#2c2c2e" />
-                    <circle cx="922" cy="366" r="31" fill="url(#sheen)" opacity="0.5" />
+                    <circle cx="922" cy="366" r="40" fill="url(#thumbstickBase)" filter="url(#buttonShadow)" />
+                    <circle cx="922" cy="366" r="40" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2" />
+                    <circle cx="922" cy="366" r="30" fill="url(#thumbstickCap)" />
+                    <circle cx="922" cy="366" r="30" fill="none" stroke="#000" strokeWidth="1" opacity="0.3" />
                 </g>
             </svg>
 

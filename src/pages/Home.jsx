@@ -18,7 +18,7 @@ import { RevealText, RevealBreath, StaggerGroup, StaggerItem } from '../componen
 import SwitchEventCard from '../components/SwitchEventCard.jsx';
 
 /* ─── Constants & Data ─── */
-const SPONSORS = ["NEBULA", "CORTEXA", "CHAINSTACK", "VECTOR", "REDSHIFT", "FOUNDRY"];
+const SPONSORS = ["HP", "DELL", "GOOGLE", "COCO COLA", "REDBULL", "JAVA"];
 
 const FAQS = [
   [
@@ -148,7 +148,7 @@ export default function Home() {
             </RevealBreath>
             <RevealBreath delay={0.2}>
               <p style={{ ...styles.textMuted, marginTop: '1rem' }}>
-                Expect engineers who ship at scale, founders mid-raise, and security researchers who
+                Expect engiers who ship at scale, founders mid-raise, and security researchers who
                 break things on stage. No keynote fluff.
               </p>
             </RevealBreath>

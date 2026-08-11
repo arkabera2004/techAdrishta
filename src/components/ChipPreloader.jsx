@@ -142,49 +142,49 @@ export default function ChipPreloader({ onComplete }) {
                 });
             };
 
-            // 0.0s - 0.3s: Glow gently intensifies
+            // 0.0s - 0.2s: Glow gently intensifies
             tl.to(chipRef.current, { 
                 filter: 'drop-shadow(0px 0px 45px rgba(255,170,0,1))', 
-                duration: 0.3,
+                duration: 0.2,
                 ease: "power2.inOut"
             }, 0);
 
-            // 0.1s - 1.1s: Traces draw outward smoothly and fluidly
+            // 0.1s - 0.8s: Traces draw outward smoothly and fluidly
             tl.to(traceEls, { 
                 strokeDashoffset: 0, 
-                duration: 1.0, 
+                duration: 0.7, 
                 ease: "power2.inOut",
                 onUpdate: syncDots
             }, 0.1);
 
-            // 1.3s - 1.8s: Pause briefly at full spread, then retract smoothly
+            // 1.0s - 1.4s: Pause briefly at full spread, then retract smoothly
             tl.to(traceEls, { 
                 strokeDashoffset: (i, el) => parseFloat(el.dataset.len) + 5,
-                duration: 0.5, 
+                duration: 0.4, 
                 ease: "power2.inOut",
                 onUpdate: syncDots
-            }, 1.3);
+            }, 1.0);
 
             // Hide the dots right as they hit the chip to prevent lingering
             tl.to(dotEls, {
                 opacity: 0,
                 duration: 0.1,
                 ease: "power2.in"
-            }, 1.7);
+            }, 1.3);
 
-            // 1.8s - 2.1s: Chip and overlay gracefully fade out
+            // 1.4s - 1.6s: Chip and overlay gracefully fade out
             tl.to(chipRef.current, { 
                 opacity: 0, 
                 filter: 'drop-shadow(0px 0px 0px rgba(255,170,0,0))', 
-                duration: 0.3, 
+                duration: 0.2, 
                 ease: "power2.in" 
-            }, 1.8);
+            }, 1.4);
 
             tl.to(overlayRef.current, {
                 opacity: 0,
-                duration: 0.3,
+                duration: 0.2,
                 ease: "power2.inOut"
-            }, 1.9);
+            }, 1.5);
 
         }, overlayRef);
 

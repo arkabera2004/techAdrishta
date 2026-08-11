@@ -10,10 +10,12 @@ import SpeakerCard from '../components/SpeakerCard';
 import Lanyard from '../components/Lanyard';
 import MusicPlayer from '../components/MusicPlayer.jsx'
 
+
 import { events, FEST } from '../data/events';
 import { speakers } from '../data/speakers';
 import { schedule, scheduleColors } from '../data/schedule';
 import { RevealText, RevealBreath, StaggerGroup, StaggerItem } from '../components/animations/Reveal';
+import SwitchEventCard from '../components/SwitchEventCard.jsx';
 
 /* ─── Constants & Data ─── */
 const SPONSORS = ["NEBULA", "CORTEXA", "CHAINSTACK", "VECTOR", "REDSHIFT", "FOUNDRY"];
@@ -133,7 +135,7 @@ export default function Home() {
       <div style={styles.contentWrap}>
         {/* ─── ABOUT ─── */}
         <section style={styles.gridSection}>
-          <div>
+          {/* <div>
             <RevealText>
               <h2 className="section-title">About the event</h2>
             </RevealText>
@@ -159,7 +161,8 @@ export default function Home() {
               <li><strong style={{ color: '#fff' }}>Listen</strong> — talks from people running production systems.</li>
               <li><strong style={{ color: '#fff' }}>Compete</strong> — CTF, pitch arena and the gaming bracket.</li>
             </ul>
-          </RevealBreath>
+          </RevealBreath> */}
+          <SwitchEventCard />
         </section>
 
         {/* ─── FEATURED TICKETS ─── */}

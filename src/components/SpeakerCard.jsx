@@ -35,7 +35,7 @@ export default function SpeakerCard({ speaker }) {
   const relatedEvent = events.find(e => e.speaker?.name === speaker.name);
 
   return (
-    <div 
+    <div
       className="relative w-full flex flex-col md:block md:aspect-[1600/872] bg-cover bg-center bg-[#0a0d14]"
       style={{ backgroundImage: "url('/speakerbackground.png')" }}
     >
@@ -61,7 +61,7 @@ export default function SpeakerCard({ speaker }) {
         <p className="mt-4 text-sm md:text-base text-slate-400 leading-relaxed max-w-lg line-clamp-3 md:line-clamp-none">
           {speaker.bio}
         </p>
-        
+
         {/* Socials */}
         <div className="mt-8 flex items-center gap-3">
           {speaker.socials?.linkedin && (
@@ -91,13 +91,13 @@ export default function SpeakerCard({ speaker }) {
       <div className="relative md:absolute md:right-[6%] md:bottom-0 w-full h-[400px] md:w-[26%] md:h-[88%] order-2 mt-8 md:mt-0 overflow-visible pointer-events-none">
         {/* IMPORTANT: The bottom-[44%] offset below is tuned specifically to podium.png's proportions 
             so the speaker clears the solid desk panel. If podium.png is changed, this offset must be re-tuned. */}
-        <img 
-          src={speaker.image} 
+        <img
+          src={speaker.image}
           alt={speaker.name}
           className="absolute left-1/2 -translate-x-1/2 bottom-[44%] w-[60%] md:w-[98%] z-[1] drop-shadow-2xl object-contain pointer-events-auto"
         />
-        <img 
-          src="/podium.png" 
+        <img
+          src="/podium.png"
           alt="Podium"
           className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[70%] md:w-full z-[2] drop-shadow-2xl object-contain pointer-events-auto"
         />

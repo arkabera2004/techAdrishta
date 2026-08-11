@@ -232,9 +232,9 @@ export default function Register() {
                       value={form.event_id}
                       onChange={e => set('event_id', e.target.value)}
                       style={{ ...input(!!errors.event_id), cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
-                      <option value="">Select an event…</option>
+                      <option value="" style={{ background: '#09090f', color: '#fff' }}>Select an event…</option>
                       {events.map(ev => (
-                        <option key={ev.id} value={ev.id}>
+                        <option key={ev.id} value={ev.id} style={{ background: '#09090f', color: '#fff' }}>
                           {ev.title} — {form.is_smit_student ? 'Free for SMIT students' : formatPrice(Number(ev.price))}
                         </option>
                       ))}

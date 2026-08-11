@@ -1,32 +1,43 @@
 // src/pages/Sponsors.jsx
-import { motion } from 'framer-motion';
+import LogoLoop from '../components/LogoLoop';
+import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss } from 'react-icons/si';
+
+const techLogos = [
+  { node: <SiReact />, title: "React", href: "https://react.dev" },
+  { node: <SiNextdotjs />, title: "Next.js", href: "https://nextjs.org" },
+  { node: <SiTypescript />, title: "TypeScript", href: "https://www.typescriptlang.org" },
+  { node: <SiTailwindcss />, title: "Tailwind CSS", href: "https://tailwindcss.com" },
+];
 
 export default function Sponsors() {
   return (
     <main style={styles.page}>
       <div style={styles.container}>
-        <motion.h1
-          style={styles.title}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          Sponsors
-        </motion.h1>
-        <motion.p
-          style={styles.sub}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15 }}
-        >
-          Coming soon…
-        </motion.p>
+        <div style={{ marginBottom: '4rem' }}>
+          <h1 style={styles.title}>Sponsors</h1>
+        </div>
+
+        <div style={{ height: '200px', position: 'relative', overflow: 'hidden'}}>
+          <LogoLoop
+            logos={techLogos}
+            speed={100}
+            direction="left"
+            logoHeight={60}
+            gap={60}
+            hoverSpeed={0}
+            scaleOnHover
+            fadeOut
+            fadeOutColor="#08080c"
+            ariaLabel="Technology partners"
+          />
+        </div>
       </div>
     </main>
   );
 }
 
 const styles = {
-  page: { paddingTop: '96px', minHeight: '100svh' },
+  page: { paddingTop: '96px', minHeight: '100svh', background: '#08080c' },
   container: {
     maxWidth: '72rem',
     margin: '0 auto',
@@ -35,12 +46,8 @@ const styles = {
   title: {
     fontFamily: "'Space Grotesk', sans-serif",
     fontWeight: 700,
-    fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+    fontSize: 'clamp(2rem, 5vw, 3rem)',
     color: '#fff',
     marginBottom: '1rem',
-  },
-  sub: {
-    color: 'rgba(255,255,255,0.3)',
-    fontSize: '1.125rem',
   },
 };

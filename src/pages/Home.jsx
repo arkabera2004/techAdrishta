@@ -112,19 +112,27 @@ export default function Home() {
             <Link
               to="/register"
               onClick={triggerRegisterSlide}
-              className="stamp-cta"
+              className="ticket-btn"
               style={{
+                position: 'relative',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(to right, #e7c553, #efcf69, #d4af37)',
-                padding: '1.25rem 4.5rem',
-                fontSize: '1rem',
-                fontWeight: 600,
+                background: 'linear-gradient(to bottom, #fde047, #eab308)',
+                padding: '1.25rem 4rem',
+                fontSize: '1.125rem',
+                fontWeight: 700,
                 color: '#000',
-                textDecoration: 'none'
+                textDecoration: 'none',
+                clipPath: 'polygon(5% 0, 95% 0, 100% 15%, 100% 85%, 95% 100%, 5% 100%, 0 85%, 0 15%)',
+                border: 'none',
               }}
             >
+              <div style={{
+                position: 'absolute', inset: '4px',
+                border: '2px dashed rgba(0,0,0,0.5)',
+                clipPath: 'polygon(5% 0, 95% 0, 100% 15%, 100% 85%, 95% 100%, 5% 100%, 0 85%, 0 15%)',
+              }} />
               <span style={{ position: 'relative', zIndex: 10 }}>Register Now</span>
             </Link>
             <FlipClock />
@@ -167,7 +175,20 @@ export default function Home() {
 
         {/* ─── FEATURED TICKETS ─── */}
         <section>
-          <div style={styles.sectionHeader}>
+          <div style={{ 
+            ...styles.sectionHeader, 
+            position: 'sticky', 
+            top: '-1px', 
+            zIndex: 50, 
+            background: '#09090f',
+            paddingTop: '96px', // Fills the 6rem gap
+            marginTop: '-96px', // Offsets the padding visually
+            paddingBottom: '1.5rem',
+            marginLeft: '-1.25rem', // Bleed horizontally
+            marginRight: '-1.25rem',
+            paddingLeft: '1.25rem',
+            paddingRight: '1.25rem',
+          }}>
             <RevealText>
               <h2 className="section-title">Featured tickets</h2>
             </RevealText>
@@ -182,7 +203,7 @@ export default function Home() {
                   key={ev.id}
                   style={{
                     position: 'sticky',
-                    top: `calc(120px + ${i * 24}px)`,
+                    top: `calc(160px + ${i * 24}px)`,
                     zIndex: i + 10,
                   }}
                 >
@@ -534,17 +555,21 @@ const styles = {
     textTransform: 'uppercase',
   },
   heroTitle: {
-    marginTop: '1.25rem',
+    marginTop: '1rem',
     width: '100%',
-    maxWidth: '48rem',
-    fontFamily: "'Asset', ui-serif, serif",
-    fontSize: 'clamp(3rem, 8vw, 5rem)',
-    lineHeight: 0.95,
-    fontWeight: 700,
+    maxWidth: '64rem',
+    fontFamily: "'Black Ops One', 'Impact', sans-serif",
+    fontSize: 'clamp(3rem, 10vw, 8rem)',
+    lineHeight: 0.9,
+    fontWeight: 900,
     color: '#fff',
-    WebkitTextStroke: '1.5px #D4AF37',
-    textShadow: '0 0 16px rgba(212, 175, 55, 0.25)',
+    background: 'linear-gradient(to bottom, #fef08a 0%, #eab308 40%, #ca8a04 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    WebkitTextStroke: '2px #854d0e',
+    textShadow: '0 4px 20px rgba(234, 179, 8, 0.4)',
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
   heroTagline: {
     marginTop: '1.25rem',

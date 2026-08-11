@@ -13,6 +13,7 @@ import TechTalks    from './pages/TechTalks.jsx';
 import Register     from './pages/Register.jsx';
 import Sponsors     from './pages/Sponsors.jsx';
 import Team         from './pages/Team.jsx';
+import Gallery      from './pages/Gallery.jsx';
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
       { path: 'register',      element: <Register />     },
       { path: 'sponsors',      element: <Sponsors />     },
       { path: 'team',          element: <Team />         },
+      { path: 'gallery',       element: <Gallery />      },
     ],
   },
 ]);

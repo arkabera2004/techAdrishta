@@ -189,23 +189,210 @@ export default function Home() {
             </div>
           </div>
         </section>
+      </div>
 
-        {/* ─── SPEAKERS ─── */}
-        <section>
-          <RevealText>
-            <h2 className="section-title">Speakers</h2>
-          </RevealText>
-          <StaggerGroup style={styles.speakerGrid}>
-            {topSpeakers.map(s => (
-              <StaggerItem key={s.id} style={{ width: '100%' }}>
-                <SpeakerCard speaker={s} />
-              </StaggerItem>
-            ))}
-          </StaggerGroup>
+      {/* ─── SPEAKERS ─── */}
+      <section style={{
+        position: 'relative',
+        width: '100%',
+        margin: 0,
+        padding: 0,
+        aspectRatio: '1600 / 785',
+        backgroundImage: "url('/speakerbackground.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'top center',
+        backgroundRepeat: 'no-repeat',
+        overflow: 'hidden',
+      }}>
+        {/* MusicPlayer — far left of stage */}
+        <div style={{
+          position: 'absolute',
+          left: '-1%',
+          top: '70%',
+          transform: 'translateY(-50%)',
+          width: '17%',
+          zIndex: 10,
+        }}>
+          <MusicPlayer />
+        </div>
 
-        </section>
+        {/* ─── "Featured Speaker" — pinned to top center ─── */}
+        <div style={{
+          position: 'absolute',
+          top: '6%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10,
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+        }}>
+          <p style={{
+            margin: 0,
+            fontSize: 'clamp(0.6rem, 1vw, 0.85rem)',
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 700,
+            letterSpacing: '0.3em',
+            textTransform: 'uppercase',
+            color: '#d4af37',
+          }}>
+            ✦ &nbsp; Featured Speaker &nbsp; ✦
+          </p>
+        </div>
 
-        <MusicPlayer />
+        {/* ─── Speaker details — true screen center ─── */}
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '36%',
+          zIndex: 10,
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}>
+          {/* Speaker Name */}
+          <h2 style={{
+            margin: 0,
+            fontSize: 'clamp(1.4rem, 3vw, 2.8rem)',
+            fontWeight: 700,
+            lineHeight: 1.05,
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+            color: '#ffffff',
+            letterSpacing: '-0.01em',
+          }}>
+            {topSpeakers[0]?.name}
+          </h2>
+
+          {/* Role · Company */}
+          <p style={{
+            margin: '0.5em 0 0',
+            fontSize: 'clamp(0.7rem, 1.1vw, 0.95rem)',
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 500,
+            color: 'rgba(255,255,255,0.75)',
+          }}>
+            {topSpeakers[0]?.role}
+            {topSpeakers[0]?.company && (
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>
+                {' '}· {topSpeakers[0].company}
+              </span>
+            )}
+          </p>
+
+          {/* Gold divider */}
+          <div style={{
+            width: '2rem',
+            height: '2px',
+            background: '#d4af37',
+            margin: '0.9em 0',
+            borderRadius: '2px',
+            opacity: 0.75,
+          }} />
+
+          {/* Talk title */}
+          <p style={{
+            margin: 0,
+            fontSize: 'clamp(0.6rem, 0.95vw, 0.85rem)',
+            fontFamily: "'Georgia', serif",
+            fontStyle: 'italic',
+            color: 'rgba(255,255,255,0.6)',
+            lineHeight: 1.6,
+            maxWidth: '30ch',
+          }}>
+            "{topSpeakers[0]?.talk}"
+          </p>
+
+          {/* Bio */}
+          <p style={{
+            margin: '0.8em 0 0',
+            fontSize: 'clamp(0.55rem, 0.85vw, 0.75rem)',
+            fontFamily: "'Inter', sans-serif",
+            color: 'rgba(255,255,255,0.4)',
+            lineHeight: 1.65,
+            maxWidth: '34ch',
+          }}>
+            {topSpeakers[0]?.bio}
+          </p>
+
+          {/* Social Icons */}
+          <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.1em' }}>
+            {topSpeakers[0]?.socials?.linkedin && (
+              <a href={topSpeakers[0].socials.linkedin} target="_blank" rel="noreferrer" style={iconBtnStyle}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                  <rect width="4" height="12" x="2" y="9" /><circle cx="4" cy="4" r="2" />
+                </svg>
+              </a>
+            )}
+            {topSpeakers[0]?.socials?.twitter && (
+              <a href={topSpeakers[0].socials.twitter} target="_blank" rel="noreferrer" style={iconBtnStyle}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+                </svg>
+              </a>
+            )}
+            {topSpeakers[0]?.socials?.github && (
+              <a href={topSpeakers[0].socials.github} target="_blank" rel="noreferrer" style={iconBtnStyle}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                </svg>
+              </a>
+            )}
+            {topSpeakers[0]?.socials?.instagram && (
+              <a href={topSpeakers[0].socials.instagram} target="_blank" rel="noreferrer" style={iconBtnStyle}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+              </a>
+            )}
+          </div>
+        </div>
+
+        {/* Podium + Speaker composite — right spotlight */}
+        <div style={{
+          position: 'absolute',
+          right: '10%',
+          bottom: 0,
+          width: '22%',
+        }}>
+          {/* Speaker — bottom anchored to the podium desk top (~38% up from base of podium) */}
+          {/* NOTE: 38% offset is tuned to this specific podium.png — re-tune if podium asset changes */}
+          <img
+            src={topSpeakers[0]?.image}
+            alt={topSpeakers[0]?.name}
+            style={{
+              position: 'absolute',
+              bottom: '75%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '90%',
+              objectFit: 'contain',
+              objectPosition: 'bottom',
+              filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))',
+              zIndex: 1,
+            }}
+          />
+          {/* Podium — sits above speaker in z-order to mask lower body */}
+          <img
+            src="/podium.png"
+            alt="Podium"
+            style={{
+              position: 'relative',
+              width: '100%',
+              display: 'block',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.6))',
+              zIndex: 2,
+            }}
+          />
+        </div>
+      </section>
+
+      <div style={styles.contentWrap}>
         {/* ─── SCHEDULE ─── */}
         <section>
           <RevealText>
@@ -251,7 +438,7 @@ export default function Home() {
         {/* ─── SPONSORS ─── */}
         <section>
           <RevealText>
-            <h2 className="section-title">Backed by</h2>
+            <h2 className="section-title">Sponsors</h2>
           </RevealText>
           <StaggerGroup style={styles.sponsorGrid}>
             {SPONSORS.map(s => (
@@ -303,6 +490,19 @@ export default function Home() {
     </main>
   );
 }
+
+const iconBtnStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '34px',
+  height: '34px',
+  borderRadius: '50%',
+  border: '1px solid rgba(255,255,255,0.15)',
+  color: 'rgba(255,255,255,0.7)',
+  textDecoration: 'none',
+  transition: 'background 0.2s, color 0.2s',
+};
 
 const styles = {
   heroSection: {

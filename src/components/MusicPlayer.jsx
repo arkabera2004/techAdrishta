@@ -19,9 +19,9 @@ import { useEffect, useRef, useState } from "react";
 // ---- 1. Replace this with your actual track path ----
 const AUDIO_SRC = "/audiotrack.mp3";
 
-// ---- Geometry constants (SVG viewBox is 400 x 520) ----
+// ---- Geometry constants (SVG viewBox is 400 x 430, height cropped to exclude bottom slider area) ----
 const VB_W = 400;
-const VB_H = 520;
+const VB_H = 430;
 
 const RECORD = { cx: 170, cy: 235, r: 158 };
 const LABEL_R = 52;
@@ -37,7 +37,7 @@ const REST_ROTATION = OFF_ANGLE_ABS - ON_ANGLE_ABS; // rotation delta that parks
 const MIN_ROT = Math.min(0, REST_ROTATION);
 const MAX_ROT = Math.max(0, REST_ROTATION);
 
-const VOL_TRACK = { x: 344, y: 330, w: 32, h: 150 };
+const VOL_TRACK = { x: 344, y: 255, w: 32, h: 150 };
 
 const MAX_SPIN_SPEED = 3.3; // degrees per animation frame at full playback speed
 const SPIN_EASE = 0.04; // how quickly spin speed ramps up/down
@@ -177,8 +177,8 @@ export default function MusicPlayer() {
             >
                 <defs>
                     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#ef3a2b" />
-                        <stop offset="100%" stopColor="#d1281a" />
+                        <stop offset="0%" stopColor="#8b1a1a" />
+                        <stop offset="100%" stopColor="#5c0f0f" />
                     </linearGradient>
                     <radialGradient id="recordGrad" cx="50%" cy="50%" r="50%">
                         <stop offset="0%" stopColor="#2a2a2a" />
@@ -280,7 +280,7 @@ export default function MusicPlayer() {
                         strokeLinejoin="round"
                         fill="none"
                     />
-                    
+
                     {/* The visible arm bars */}
                     <path
                         d={`M ${PIVOT.x} ${PIVOT.y} L ${ELBOW.x} ${ELBOW.y} L ${HEAD0.x} ${HEAD0.y}`}
@@ -290,31 +290,29 @@ export default function MusicPlayer() {
                         fill="none"
                         pointerEvents="none"
                     />
-                    
-                    {/* Pivot white block */}
+
+                    {/* Headshell (Dark gray elongated block) */}
                     <rect
-                        x={PIVOT.x - 12}
-                        y={PIVOT.y - 16}
-                        width="24"
-                        height="32"
-                        rx="3"
-                        fill="#ffffff"
-                        transform={`rotate(-20 ${PIVOT.x} ${PIVOT.y})`}
-                        pointerEvents="none"
-                    />
-                    
-                    {/* Headshell (Dark gray) */}
-                    <rect
-                        x={HEAD0.x - 22}
-                        y={HEAD0.y - 12}
-                        width="46"
-                        height="24"
-                        rx="4"
-                        fill="#333333"
-                        transform={`rotate(22 ${HEAD0.x} ${HEAD0.y})`}
+                        x={HEAD0.x - 10}
+                        y={HEAD0.y - 26}
+                        width="20"
+                        height="52"
+                        rx="6"
+                        fill="#2a2a2a"
                         pointerEvents="none"
                     />
                 </g>
+
+                {/* Pivot white block — STATIC (outside rotating group so it doesn't drift) */}
+                <rect
+                    x={PIVOT.x - 14}
+                    y={PIVOT.y - 22}
+                    width="28"
+                    height="38"
+                    rx="4"
+                    fill="#ffffff"
+                    pointerEvents="none"
+                />
 
                 <circle cx={PIVOT.x} cy={PIVOT.y} r="8" fill="#111" />
 

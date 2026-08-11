@@ -179,7 +179,7 @@ export default function Home() {
             ...styles.sectionHeader, 
             position: 'sticky', 
             top: '-1px', 
-            zIndex: 50, 
+            zIndex: 5, 
             background: '#09090f',
             paddingTop: '96px', // Fills the 6rem gap
             marginTop: '-96px', // Offsets the padding visually

@@ -78,7 +78,6 @@ export default function Footer() {
 const styles = {
   footer: {
     borderTop: '1px solid rgba(255,255,255,0.06)',
-    marginTop: '6rem',
   },
   container: {
     margin: '0 auto',

@@ -19,6 +19,12 @@ export async function holdSeat(eventId) {
   return data[0]; // { hold_token, expires_at }
 }
 
+export async function releaseHold(token) {
+  if (!token) return;
+  const { error } = await supabase.from("seat_holds").delete().eq("hold_token", token);
+  if (error) throw error;
+}
+
 // Submit a registration atomically
 export async function registerForEvent({
   fullName,
@@ -32,6 +38,10 @@ export async function registerForEvent({
   collegeRegNo,
   holdToken,
   accommodation,
+  teamSize,
+  accommodationDays,
+  maleCount,
+  femaleCount,
 }) {
   const { data, error } = await supabase.rpc("register_team", {
     p_full_name: fullName,
@@ -45,6 +55,10 @@ export async function registerForEvent({
     p_college_reg_no: collegeRegNo || null,
     p_hold_token: holdToken,
     p_accommodation: accommodation || false,
+    p_team_size: teamSize || null,
+    p_accommodation_days: accommodationDays || null,
+    p_accommodation_male_count: maleCount || 0,
+    p_accommodation_female_count: femaleCount || 0,
   });
   if (error) throw error;
   return data; // the new registration's id

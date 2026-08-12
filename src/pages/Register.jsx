@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Copy, CheckCircle, ChevronDown } from 'lucide-react';
 import { events as staticEvents } from '../data/events';
 import { QRCodeSVG } from 'qrcode.react';
-import { fetchEvents, registerForEvent, holdSeat } from '../lib/supabase';
+import { fetchEvents, registerForEvent, holdSeat, releaseHold } from '../lib/supabase';
 import SwitchRulesCard from '../components/SwitchRulesCard';
 
 /* ─── Constants (mirrors FEST / register.tsx) ─── */
@@ -23,7 +23,7 @@ function genRegId() {
 }
 
 /* ─── Validation (mirrors zod schemas) ─── */
-function validateDetails(form, isTeamEvent) {
+function validateDetails(form, isTeamEvent, selectedEvent) {
   const errs = {};
   if (!form.full_name.trim() || form.full_name.trim().length < 2)
     errs.full_name = 'Enter your full name';
@@ -37,8 +37,39 @@ function validateDetails(form, isTeamEvent) {
     errs.college_or_company = 'Enter your college name';
   if (!form.event_id)
     errs.event_id = 'Pick an event';
-  if (isTeamEvent && !form.team_name?.trim())
-    errs.team_name = 'Enter your team name';
+
+  if (isTeamEvent) {
+    if (!form.team_name?.trim())
+      errs.team_name = 'Enter your team name';
+
+    if (selectedEvent) {
+      const min = selectedEvent.min_team_size || 1;
+      const max = selectedEvent.max_team_size || 5;
+      if (!form.team_size || form.team_size < min || form.team_size > max) {
+        errs.team_size = `Team size must be between ${min} and ${max}`;
+      } else {
+        const missingMembers = form.team_members.some(m => !m.name.trim() || !m.email.trim() || !m.phone.trim());
+        if (missingMembers) {
+          errs.team_members = 'Please fill all member details for your team size';
+        }
+      }
+    }
+  }
+
+  if (form.accommodation) {
+    if (!form.accommodation_days || form.accommodation_days < 1) {
+      errs.accommodation_days = 'Enter valid number of days';
+    }
+    if (isTeamEvent) {
+      const totalPeople = (form.male_count || 0) + (form.female_count || 0);
+      if (totalPeople < 1) {
+        errs.accommodation_counts = 'Specify at least 1 person for accommodation';
+      }
+      if (totalPeople > (form.team_size || 5)) {
+        errs.accommodation_counts = 'Accommodation count cannot exceed team size';
+      }
+    }
+  }
   return errs;
 }
 function validateUtr(utr) {
@@ -74,10 +105,7 @@ export default function Register() {
       setTimeLeft(left);
       if (left === 0) {
         setStep(0);
-        setForm(f => {
-          if (f.event_id) sessionStorage.removeItem(`hold_${f.event_id}`);
-          return { ...f, event_id: '' };
-        });
+        if (form.event_id) sessionStorage.removeItem(`hold_${form.event_id}`);
         setHoldToken(null);
         setExpiresAt(null);
         setToastMsg({ text: "Seat hold expired. Please select the event again.", ok: false });
@@ -95,16 +123,16 @@ export default function Register() {
     phone: '',
     college_or_company: '',
     team_name: '',
-    team_members: [
-      { name: '', email: '', phone: '' },
-      { name: '', email: '', phone: '' },
-      { name: '', email: '', phone: '' },
-      { name: '', email: '', phone: '' },
-    ],
+    team_members: [], // Will populate dynamically based on team_size
     event_id: preselectedId,
     utr_number: '',
     is_smit_student: false,
     accommodation: false,
+    team_size: '',
+    accommodation_days: 1,
+    male_count: 0,
+    female_count: 0,
+    solo_gender: 'Male',
   });
 
   const [showRules, setShowRules] = useState(false);
@@ -118,75 +146,7 @@ export default function Register() {
     }
   }, [preselectedId]);
 
-  // Hold seat automatically when event_id is selected
-  useEffect(() => {
-    if (!form.event_id) {
-      setHoldToken(null);
-      setExpiresAt(null);
-      return;
-    }
 
-    // Check sessionStorage first
-    const storedHoldStr = sessionStorage.getItem(`hold_${form.event_id}`);
-    if (storedHoldStr) {
-      try {
-        const storedHold = JSON.parse(storedHoldStr);
-        if (new Date(storedHold.expires_at).getTime() > Date.now()) {
-          setHoldToken(storedHold.hold_token);
-          setExpiresAt(storedHold.expires_at);
-          return; // Use stored hold, skip API call
-        } else {
-          sessionStorage.removeItem(`hold_${form.event_id}`);
-        }
-      } catch (e) {
-        sessionStorage.removeItem(`hold_${form.event_id}`);
-      }
-    }
-
-    if (holdInProgress.current) return;
-
-    let isActive = true;
-    holdInProgress.current = true;
-
-    const attemptHold = async () => {
-      try {
-        const holdResult = await holdSeat(form.event_id);
-        if (isActive) {
-          setHoldToken(holdResult.hold_token);
-          setExpiresAt(holdResult.expires_at);
-          sessionStorage.setItem(`hold_${form.event_id}`, JSON.stringify({
-            hold_token: holdResult.hold_token,
-            expires_at: holdResult.expires_at
-          }));
-        }
-      } catch (err) {
-        if (isActive) {
-          console.error("Hold seat error:", err);
-          if (err.message && err.message.includes("fully booked")) {
-            setToastMsg({ text: "Sorry, this event is fully booked.", ok: false });
-          } else {
-            setToastMsg({ text: "Something went wrong reserving the seat. Please try again.", ok: false });
-          }
-          // Refresh events to show updated seats
-          fetchEvents().then(data => {
-            if (data && data.length > 0) setEvents(data.map(d => ({ ...d, title: d.name || d.title })));
-          }).catch(e => console.error(e));
-
-          setForm(f => ({ ...f, event_id: '' }));
-          setHoldToken(null);
-          setExpiresAt(null);
-        }
-      } finally {
-        if (isActive) holdInProgress.current = false;
-      }
-    };
-    attemptHold();
-
-    return () => {
-      isActive = false;
-      holdInProgress.current = false;
-    };
-  }, [form.event_id]);
 
   const selected = events.find(e => String(e.id) === String(form.event_id));
   const isTeamEvent = selected?.type === 'team' || selected?.is_team || String(selected?.title || selected?.name).toLowerCase().includes('hackathon') || String(selected?.title || selected?.name).toLowerCase().includes('flag') || false;
@@ -199,7 +159,8 @@ export default function Register() {
     }).catch(err => console.error("Failed to fetch events", err));
   }, []);
   const amount = Number(selected?.price ?? 0);
-  const accommodationPrice = form.accommodation ? 500 : 0;
+  const totalPeople = isTeamEvent ? ((form.male_count || 0) + (form.female_count || 0)) : 1;
+  const accommodationPrice = form.accommodation ? 500 * (form.accommodation_days || 1) * totalPeople : 0;
   const amountDue = form.is_smit_student ? 0 : amount + accommodationPrice;
   const steps = form.is_smit_student ? SMIT_STEPS : STEPS;
   const displayedStep = form.is_smit_student && step === 3 ? 2 : step;
@@ -239,6 +200,10 @@ export default function Register() {
         collegeRegNo: formState.registration_no || null,
         holdToken: tokenToUse,
         accommodation: formState.accommodation,
+        teamSize: isTeamEvent ? formState.team_size : null,
+        accommodationDays: formState.accommodation ? formState.accommodation_days : null,
+        maleCount: formState.accommodation ? (isTeamEvent ? formState.male_count : (formState.solo_gender === 'Male' ? 1 : 0)) : 0,
+        femaleCount: formState.accommodation ? (isTeamEvent ? formState.female_count : (formState.solo_gender === 'Female' ? 1 : 0)) : 0,
       });
       setRegId(newId || genRegId());
       setStep(3);
@@ -261,23 +226,47 @@ export default function Register() {
     }
   }
 
+  const handleBack = () => {
+    if (holdToken) {
+      releaseHold(holdToken).catch(() => {});
+      setHoldToken(null);
+      setExpiresAt(null);
+      sessionStorage.removeItem(`hold_${form.event_id}`);
+    }
+    setStep(0);
+  };
+
   /* Step 0 → continue */
   async function nextFromDetails() {
-    const errs = validateDetails(form, isTeamEvent);
+    const errs = validateDetails(form, isTeamEvent, selected);
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
-    if (!holdToken) {
-      setToastMsg({ text: "Please wait, confirming seat availability...", ok: false });
-      return;
-    }
+    setSubmitting(true);
+    try {
+      const holdResult = await holdSeat(form.event_id);
+      setHoldToken(holdResult.hold_token);
+      setExpiresAt(holdResult.expires_at);
+      sessionStorage.setItem(`hold_${form.event_id}`, JSON.stringify({
+        hold_token: holdResult.hold_token,
+        expires_at: holdResult.expires_at
+      }));
+      setErrors({});
 
-    setErrors({});
-
-    if (form.is_smit_student) {
-      await submitRegistration(form, holdToken);
-      return;
+      if (amountDue === 0 || form.is_smit_student) {
+        await submitRegistration(form, holdResult.hold_token);
+      } else {
+        setStep(1);
+      }
+    } catch (err) {
+      if (err.message && err.message.includes("fully booked")) {
+        setToastMsg({ text: "Sorry, this event is fully booked.", ok: false });
+      } else {
+        console.error(err);
+        setToastMsg({ text: "Couldn't reserve a seat. Please try again.", ok: false });
+      }
+    } finally {
+      setSubmitting(false);
     }
-    setStep(1);
   }
 
   /* Step 2 → submit UTR */
@@ -303,9 +292,9 @@ export default function Register() {
         {toastMsg && (
           <motion.div
             style={{ ...styles.toast, background: toastMsg.ok ? '#10b981' : '#ef4444' }}
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: 20 }}
           >
             {toastMsg.text}
           </motion.div>
@@ -352,12 +341,7 @@ export default function Register() {
             {/* ── Step 0: Your details ── */}
             {step === 0 && (
               <motion.div key="details" {...fade} style={styles.stepBody}>
-                {holdToken && (
-                  <div style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                    Seat reserved for {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
-                  </div>
-                )}
+
                 <Field id="full_name" label="Full name" error={errors.full_name} required>
                   <input id="full_name" type="text" placeholder="Arjun Sharma"
                     value={form.full_name}
@@ -382,14 +366,14 @@ export default function Register() {
                 )}
 
                 <Field id="phone" label="Phone" error={errors.phone} required>
-                  <input id="phone" type="tel" placeholder="+91 98765 43210"
+                  <input id="phone" type="tel" placeholder="+91 "
                     value={form.phone}
                     onChange={e => set('phone', e.target.value)}
                     style={input(!!errors.phone)} />
                 </Field>
 
-                <Field id="org" label="College or company" error={errors.college_or_company} required>
-                  <input id="org" type="text" placeholder="IIT Bangalore / SMIT"
+                <Field id="org" label="College" error={errors.college_or_company} required>
+                  <input id="org" type="text" placeholder="SMIT"
                     value={form.college_or_company}
                     onChange={e => set('college_or_company', e.target.value)}
                     style={input(!!errors.college_or_company)} />
@@ -417,6 +401,24 @@ export default function Register() {
 
                 {isTeamEvent && (
                   <>
+                    <Field id="team_size" label={`Number of Team Members (${selected?.min_team_size || 1} - ${selected?.max_team_size || 5})`} error={errors.team_size} required>
+                      <input id="team_size" type="number"
+                        min={selected?.min_team_size || 1}
+                        max={selected?.max_team_size || 5}
+                        placeholder={`Min ${selected?.min_team_size || 1}, Max ${selected?.max_team_size || 5}`}
+                        value={form.team_size}
+                        onChange={e => {
+                          const size = parseInt(e.target.value) || '';
+                          set('team_size', size);
+                          const newMembers = [...form.team_members];
+                          const targetLen = typeof size === 'number' && size > 1 ? size - 1 : 0;
+                          while (newMembers.length < targetLen) newMembers.push({ name: '', email: '', phone: '' });
+                          if (newMembers.length > targetLen) newMembers.length = targetLen;
+                          set('team_members', newMembers);
+                        }}
+                        style={input(!!errors.team_size)} />
+                    </Field>
+
                     <Field id="team_name" label="Team Name" error={errors.team_name} required>
                       <input id="team_name" type="text" placeholder="e.g. The Innovators"
                         value={form.team_name}
@@ -424,48 +426,50 @@ export default function Register() {
                         style={input(!!errors.team_name)} />
                     </Field>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
-                      <p style={{ ...styles.fieldLabel, marginBottom: '0.25rem' }}>Other Team Members (Optional)</p>
-                      <p style={styles.hint}>You are the Team Leader. You can add up to 4 more members below.</p>
-                      {form.team_members.map((member, idx) => (
-                        <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
-                          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', width: '100%' }}>Member {idx + 2}</span>
-                          <input
-                            type="text"
-                            placeholder="Name"
-                            value={member.name}
-                            onChange={e => {
-                              const newMembers = [...form.team_members];
-                              newMembers[idx].name = e.target.value;
-                              set('team_members', newMembers);
-                            }}
-                            style={{ ...input(false), flex: '1 1 120px' }}
-                          />
-                          <input
-                            type="email"
-                            placeholder="Email"
-                            value={member.email}
-                            onChange={e => {
-                              const newMembers = [...form.team_members];
-                              newMembers[idx].email = e.target.value;
-                              set('team_members', newMembers);
-                            }}
-                            style={{ ...input(false), flex: '1 1 120px' }}
-                          />
-                          <input
-                            type="tel"
-                            placeholder="Phone"
-                            value={member.phone}
-                            onChange={e => {
-                              const newMembers = [...form.team_members];
-                              newMembers[idx].phone = e.target.value;
-                              set('team_members', newMembers);
-                            }}
-                            style={{ ...input(false), flex: '1 1 100px' }}
-                          />
-                        </div>
-                      ))}
-                    </div>
+                    {form.team_members.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
+                        <p style={{ ...styles.fieldLabel, marginBottom: '0.25rem', color: errors.team_members ? '#ef4444' : undefined }}>Other Team Members</p>
+                        <p style={styles.hint}>You are the Team Leader. Fill details for the other {form.team_members.length} members.</p>
+                        {form.team_members.map((member, idx) => (
+                          <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', width: '100%' }}>Member {idx + 2}</span>
+                            <input
+                              type="text"
+                              placeholder="Name"
+                              value={member.name}
+                              onChange={e => {
+                                const newMembers = [...form.team_members];
+                                newMembers[idx].name = e.target.value;
+                                set('team_members', newMembers);
+                              }}
+                              style={{ ...input(false), flex: '1 1 120px' }}
+                            />
+                            <input
+                              type="email"
+                              placeholder="Email"
+                              value={member.email}
+                              onChange={e => {
+                                const newMembers = [...form.team_members];
+                                newMembers[idx].email = e.target.value;
+                                set('team_members', newMembers);
+                              }}
+                              style={{ ...input(false), flex: '1 1 120px' }}
+                            />
+                            <input
+                              type="tel"
+                              placeholder="Phone"
+                              value={member.phone}
+                              onChange={e => {
+                                const newMembers = [...form.team_members];
+                                newMembers[idx].phone = e.target.value;
+                                set('team_members', newMembers);
+                              }}
+                              style={{ ...input(false), flex: '1 1 100px' }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </>
                 )}
 
@@ -473,7 +477,14 @@ export default function Register() {
                 <label style={styles.smitLabel} htmlFor="is_smit">
                   <input id="is_smit" type="checkbox"
                     checked={form.is_smit_student}
-                    onChange={e => set('is_smit_student', e.target.checked)}
+                    onChange={e => {
+                      const checked = e.target.checked;
+                      setForm(f => ({
+                        ...f,
+                        is_smit_student: checked,
+                        college_or_company: checked ? 'SMIT' : f.college_or_company
+                      }));
+                    }}
                     style={styles.checkbox}
                   />
                   <span>
@@ -501,13 +512,13 @@ export default function Register() {
                           e.preventDefault();
                           setShowRules(true);
                         }}
-                        style={{ 
-                          background: 'rgba(0, 195, 227, 0.1)', 
-                          border: '1px solid rgba(0, 195, 227, 0.3)', 
-                          color: '#00c3e3', 
-                          textDecoration: 'none', 
-                          cursor: 'pointer', 
-                          fontWeight: '600', 
+                        style={{
+                          background: 'rgba(0, 195, 227, 0.1)',
+                          border: '1px solid rgba(0, 195, 227, 0.3)',
+                          color: '#00c3e3',
+                          textDecoration: 'none',
+                          cursor: 'pointer',
+                          fontWeight: '600',
                           fontSize: '12px',
                           padding: '4px 10px',
                           borderRadius: '12px',
@@ -518,6 +529,42 @@ export default function Register() {
                       </button>
                     </div>
                     <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', marginLeft: '28px' }}>*prices may vary at any time</span>
+
+                    {form.accommodation && (
+                      <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginLeft: '28px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>Number of Days</label>
+                          <input type="number" min="1" value={form.accommodation_days} onChange={e => set('accommodation_days', parseInt(e.target.value) || '')} style={{ ...input(!!errors.accommodation_days), padding: '0.5rem', width: '100px' }} />
+                          {errors.accommodation_days && <span style={{ color: '#ef4444', fontSize: '12px' }}>{errors.accommodation_days}</span>}
+                        </div>
+
+                        {!isTeamEvent ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>Gender</label>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                                <input type="radio" name="solo_gender" value="Male" checked={form.solo_gender === 'Male'} onChange={() => set('solo_gender', 'Male')} style={{ accentColor: '#8b5cf6' }} /> Male
+                              </label>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                                <input type="radio" name="solo_gender" value="Female" checked={form.solo_gender === 'Female'} onChange={() => set('solo_gender', 'Female')} style={{ accentColor: '#8b5cf6' }} /> Female
+                              </label>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', gap: '1rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
+                              <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>Male Count</label>
+                              <input type="number" min="0" value={form.male_count} onChange={e => set('male_count', parseInt(e.target.value) || 0)} style={{ ...input(false), padding: '0.5rem' }} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
+                              <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>Female Count</label>
+                              <input type="number" min="0" value={form.female_count} onChange={e => set('female_count', parseInt(e.target.value) || 0)} style={{ ...input(false), padding: '0.5rem' }} />
+                            </div>
+                          </div>
+                        )}
+                        {errors.accommodation_counts && <span style={{ color: '#ef4444', fontSize: '12px' }}>{errors.accommodation_counts}</span>}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -530,9 +577,9 @@ export default function Register() {
                   id="reg-continue-btn"
                 >
                   {submitting
-                    ? 'Submitting…'
+                    ? 'Checking availability…'
                     : form.is_smit_student
-                      ? 'Confirm free SMIT pass'
+                      ? 'Confirm free registration'
                       : 'Continue to payment'}
                 </button>
               </motion.div>
@@ -564,7 +611,7 @@ export default function Register() {
                   {copied ? 'Copied!' : 'Copy UPI ID'}
                 </button>
                 <div style={styles.btnRow}>
-                  <button type="button" onClick={() => setStep(0)} style={styles.ghostBtn}>Back</button>
+                  <button type="button" onClick={handleBack} style={styles.ghostBtn}>Back</button>
                   <button type="button" onClick={() => setStep(2)} style={styles.primaryBtn} id="paid-btn">
                     I've paid
                   </button>
@@ -687,6 +734,7 @@ function input(hasError) {
     boxSizing: 'border-box',
     transition: 'border-color 0.2s',
     appearance: 'none',
+    colorScheme: 'dark', // Native spin buttons will adapt to dark mode
   };
 }
 
@@ -705,19 +753,17 @@ const styles = {
     position: 'relative',
   },
 
-  /* Toast */
   toast: {
     position: 'fixed',
-    top: '80px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    padding: '10px 20px',
+    bottom: '40px',
+    right: '24px',
+    padding: '12px 24px',
     borderRadius: '999px',
     color: '#fff',
-    fontSize: '0.875rem',
+    fontSize: '0.9rem',
     fontWeight: 600,
     zIndex: 9000,
-    boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
     whiteSpace: 'nowrap',
   },
 

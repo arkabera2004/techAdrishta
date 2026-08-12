@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 import TicketCard from '../components/TicketCard';
 import { events } from '../data/events';
 
-const CATEGORIES = ['All', 'Hackathon', 'Tech Talk', 'Workshop', 'Competition'];
-const CAT_KEY = { 'Hackathon': 'hackathon', 'Tech Talk': 'techtalk', 'Workshop': 'workshop', 'Competition': 'competition' };
+const CATEGORIES = ['All', 'Hackathon', 'TED Talk', 'Workshop', 'Competition'];
+const CAT_KEY = { 'Hackathon': 'hackathon', 'TED Talk': 'tedtalk', 'Workshop': 'workshop', 'Competition': 'competition' };
 
 const getTilt = (id) => {
   const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);

@@ -4,7 +4,7 @@ export const FEST = {
   name: "TECH ADRISHTA",
   tagline: "",
   dates: "12-13 September 2026",
-  venue: "Innovation Campus, Bengaluru",
+  venue: "SMIT campus, Sikkim",
   startsAt: "2026-09-12T09:00:00+05:30",
 };
 
@@ -38,7 +38,7 @@ export const events = [
     id: 'techtalk-llm',
     title: 'Scaling LLMs Without Losing Your Mind',
     description: 'A field report on running inference at 40M requests a day.',
-    category: 'techtalk',
+    category: 'tedtalk',
     date: '12 Sept',
     time: '11:30 AM',
     venue: 'Auditorium 1',
@@ -47,7 +47,7 @@ export const events = [
     seatsLeft: 87,
     gate: 'Auditorium 1',
     slot: '11:30 AM',
-    track: 'Tech Talk',
+    track: 'TED Talk',
     image_url: '/backgroundimage.jpeg',
     rules: [],
     speaker: {
@@ -79,7 +79,7 @@ export const events = [
     id: 'techtalk-sustainability',
     title: 'Sustainable Tech: Building for the Planet',
     description: 'How to engineer for impact — green architecture from first principles.',
-    category: 'techtalk',
+    category: 'tedtalk',
     date: '12 Sept',
     time: '03:30 PM',
     venue: 'Auditorium 1',
@@ -88,7 +88,7 @@ export const events = [
     seatsLeft: 140,
     gate: 'Auditorium 1',
     slot: '03:30 PM',
-    track: 'Tech Talk',
+    track: 'TED Talk',
     image_url: '/backgroundimage.jpeg',
     rules: [],
     speaker: {
@@ -143,7 +143,7 @@ export const events = [
     id: 'techtalk-ai',
     title: 'AI at the Edge: From Cloud to Device',
     description: 'Deploying models on constrained hardware — lessons from production.',
-    category: 'techtalk',
+    category: 'tedtalk',
     date: '13 Sept',
     time: '02:00 PM',
     venue: 'Auditorium 1',
@@ -152,7 +152,7 @@ export const events = [
     seatsLeft: 165,
     gate: 'Auditorium 1',
     slot: '02:00 PM',
-    track: 'Tech Talk',
+    track: 'TED Talk',
     image_url: '/backgroundimage.jpeg',
     rules: [],
     speaker: {
@@ -190,9 +190,9 @@ export const events = [
 export const getCategoryTheme = (category) => {
   const themes = {
     hackathon:   { base: '#F97316', accent: '#EF4444', ink: '#1c0a00', label: 'Hackathon',   pattern: 'circuit' },
-    techtalk:    { base: '#8B5CF6', accent: '#C084FC', ink: '#1a0a2e', label: 'Tech Talk',   pattern: 'waves'   },
+    tedtalk:    { base: '#8B5CF6', accent: '#C084FC', ink: '#1a0a2e', label: 'TED Talk',   pattern: 'waves'   },
     workshop:    { base: '#14B8A6', accent: '#FACC15', ink: '#001a18', label: 'Workshop',    pattern: 'gears'   },
     competition: { base: '#EC4899', accent: '#3B82F6', ink: '#1a0022', label: 'Competition', pattern: 'grid'    },
   };
-  return themes[category] || themes.techtalk;
+  return themes[category] || themes.tedtalk;
 };

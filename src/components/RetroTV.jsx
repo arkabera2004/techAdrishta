@@ -52,7 +52,7 @@ export default function RetroTV({ videos = [], initialIndex = 0 }) {
   const [dialAngle, setDialAngle] = useState(angleForIndex(selected, videos.length));
   const [volAngle, setVolAngle] = useState(VOL_MIN_ANGLE + 0.6 * (VOL_MAX_ANGLE - VOL_MIN_ANGLE));
 
-  const svgRef = useRef(null);
+  const containerRef = useRef(null);
   const videoRef = useRef(null);
   const dragTargetRef = useRef(null);
 
@@ -65,7 +65,7 @@ export default function RetroTV({ videos = [], initialIndex = 0 }) {
   }, []);
 
   const toSvgPoint = (clientX, clientY) => {
-    const r = svgRef.current.getBoundingClientRect();
+    const r = containerRef.current.getBoundingClientRect();
     return { x: ((clientX - r.left) / r.width) * VB_W, y: ((clientY - r.top) / r.height) * VB_H };
   };
 
@@ -107,14 +107,17 @@ export default function RetroTV({ videos = [], initialIndex = 0 }) {
 
   return (
     <div style={{ width: "100%", maxWidth: "960px", margin: "0 auto" }}>
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${VB_W} ${VB_H}`}
-        style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
+      <div 
+        ref={containerRef}
+        style={{ position: "relative", width: "100%", aspectRatio: "1000/680", containerType: "inline-size", userSelect: "none" }}
         onPointerMove={handleMove}
         onPointerUp={handleUp}
         onPointerCancel={handleUp}
       >
+        <svg
+          viewBox={`0 0 ${VB_W} ${VB_H}`}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
+        >
         <defs>
           {/* ── Wood grain filter ── */}
           <filter id="tv-wood-grain" x="0%" y="0%" width="100%" height="100%" colorInterpolationFilters="sRGB">
@@ -288,36 +291,6 @@ export default function RetroTV({ videos = [], initialIndex = 0 }) {
             {/* ── Screen surface ── */}
             <path d={SCREEN_PATH} fill="#040408" stroke="#181818" strokeWidth="2" />
 
-            {/* ── Video content ── */}
-            <g clipPath="url(#tv-screen-clip)">
-              <foreignObject x="24" y="22" width="610" height="530">
-                <div style={{
-                  width: "100%", height: "100%",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "#000",
-                }}>
-                  {current?.videoUrl ? (
-                    <video
-                      ref={videoRef}
-                      key={current.videoUrl}
-                      src={current.videoUrl}
-                      controls
-                      autoPlay
-                      muted
-                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                    />
-                  ) : (
-                    <div style={{ color: "#4a5568", fontSize: 13, fontFamily: "monospace", letterSpacing: "0.15em" }}>
-                      ░ NO SIGNAL ░
-                    </div>
-                  )}
-                </div>
-              </foreignObject>
-            </g>
-
-            {/* Screen bezel chrome inner rim (structural bezel, not a filter) */}
-            <path d={SCREEN_PATH} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2.5" pointerEvents="none" />
-
             {/* ════════════════════════════════════════════════════════
               RIGHT CONTROL COLUMN
           ════════════════════════════════════════════════════════ */}
@@ -353,34 +326,6 @@ export default function RetroTV({ videos = [], initialIndex = 0 }) {
             <rect x="678" y="80" width="288" height="24" rx="6" fill="#161a14" />
             <text x="692" y="97" fontSize="9" fontFamily="'Courier New', monospace"
               fill="#546a48" letterSpacing="2">CH  PROGRAMME</text>
-
-            {/* Channel list */}
-            <foreignObject x="678" y="104" width="288" height="226">
-              <div style={{ fontFamily: "'Courier New', monospace", height: "100%", overflowY: "auto" }}>
-                {videos.map((v, i) => (
-                  <div
-                    key={v.name + i}
-                    onPointerDown={() => selectChannel(i)}
-                    style={{
-                      padding: "7px 12px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid rgba(0,120,50,0.08)",
-                      color: i === selected ? "#ffcf4d" : "#2ecc71",
-                      background: i === selected ? "rgba(255,207,77,0.07)" : "transparent",
-                      display: "flex", alignItems: "center", gap: "8px",
-                      fontSize: "13px",
-                    }}
-                  >
-                    <span style={{ color: i === selected ? "#ff7040" : "#2a4a30", minWidth: "14px", fontSize: "10px" }}>
-                      {i === selected ? "▶" : "·"}
-                    </span>
-                    <span style={{ color: i === selected ? "#ffcf4d" : "#608050", minWidth: "20px" }}>{i + 1}</span>
-                    <span style={{ color: "#304428", fontSize: "11px" }}>│</span>
-                    <span>{v.name}</span>
-                  </div>
-                ))}
-              </div>
-            </foreignObject>
 
             {/* ── Control plate (lighter aluminium) ── */}
             <rect x="678" y="340" width="288" height="274" rx="8" fill="#ccc9c0" />
@@ -487,6 +432,81 @@ export default function RetroTV({ videos = [], initialIndex = 0 }) {
           </g>{/* end cabinet clip group */}
         </g>{/* end cabinet shadow group */}
       </svg>
+
+      {/* ── HTML Video Overlay ── */}
+      <div style={{
+          position: "absolute",
+          left: "2.4%", // 24 / 1000
+          top: "3.235%", // 22 / 680
+          width: "61%", // 610 / 1000
+          height: "77.941%", // 530 / 680
+          borderRadius: "6cqi",
+          overflow: "hidden",
+          background: "#000",
+          display: "flex", alignItems: "center", justifyContent: "center"
+      }}>
+          {current?.videoUrl ? (
+            <video
+              ref={videoRef}
+              key={current.videoUrl}
+              src={current.videoUrl}
+              controls
+              autoPlay
+              muted
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          ) : (
+            <div style={{ color: "#4a5568", fontSize: "1.3cqi", fontFamily: "monospace", letterSpacing: "0.15em" }}>
+              ░ NO SIGNAL ░
+            </div>
+          )}
+      </div>
+
+      {/* ── HTML Channel List Overlay ── */}
+      <div style={{
+          position: "absolute",
+          left: "67.8%", // 678 / 1000
+          top: "15.294%", // 104 / 680
+          width: "28.8%", // 288 / 1000
+          height: "33.235%", // 226 / 680
+          overflowY: "auto",
+          fontFamily: "'Courier New', monospace"
+      }}>
+          {videos.map((v, i) => (
+            <div
+              key={v.name + i}
+              onPointerDown={() => selectChannel(i)}
+              style={{
+                padding: "0.7cqi 1.2cqi",
+                cursor: "pointer",
+                borderBottom: "1px solid rgba(0,120,50,0.08)",
+                color: i === selected ? "#ffcf4d" : "#2ecc71",
+                background: i === selected ? "rgba(255,207,77,0.07)" : "transparent",
+                display: "flex", alignItems: "center", gap: "0.8cqi",
+                fontSize: "1.3cqi",
+              }}
+            >
+              <span style={{ color: i === selected ? "#ff7040" : "#2a4a30", minWidth: "1.4cqi", fontSize: "1.0cqi" }}>
+                {i === selected ? "▶" : "·"}
+              </span>
+              <span style={{ color: i === selected ? "#ffcf4d" : "#608050", minWidth: "2.0cqi" }}>{i + 1}</span>
+              <span style={{ color: "#304428", fontSize: "1.1cqi" }}>│</span>
+              <span>{v.name}</span>
+            </div>
+          ))}
+      </div>
+
+      {/* ── Overlay SVG for Screen Bezel Inner Rim ── */}
+      <svg
+          viewBox={`0 0 ${VB_W} ${VB_H}`}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block", pointerEvents: "none" }}
+      >
+          <g clipPath="url(#tv-cabinet-clip)">
+            {/* Screen bezel chrome inner rim (structural bezel, not a filter) */}
+            <path d={SCREEN_PATH} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2.5" pointerEvents="none" />
+          </g>
+      </svg>
+      </div>
     </div>
   );
 }

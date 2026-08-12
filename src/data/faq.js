@@ -10,7 +10,7 @@ export const faq = [
   },
   {
     q: 'Is accommodation provided?',
-    a: 'We do not provide on-site accommodation. The Innovation Campus is within 5km of several budget hotels and hostels. Bengaluru has excellent public transit and ride-sharing options.',
+    a: 'We do not provide on-site accommodation. The SMIT campus is within 5km of several budget hotels and hostels. Sikkim has excellent public transit and ride-sharing options.',
   },
   {
     q: 'What is the SMIT student waiver?',

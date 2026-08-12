@@ -8,7 +8,7 @@ import ParticleText from './ParticleText';
 const links = [
   { to: "/", label: "Home" },
   { to: "/events", label: "Events" },
-  { to: "/tech-talks", label: "Tech Talks" },
+  { to: "/tech-talks", label: "TED Talks" },
   { to: "/gallery", label: "Gallery" },
   { to: "/team", label: "Team" },
 ];
@@ -24,7 +24,7 @@ export default function Header() {
   const isActive = (to) =>
     to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
 
-  const activePath = links.find(link => isActive(link.to))?.to || "/";
+  const activePath = links.find(link => isActive(link.to))?.to || null;
   const currentTarget = hoveredPath || focusedPath || activePath;
 
   useEffect(() => {
@@ -216,14 +216,17 @@ const styles = {
     right: '1.5rem',
     zIndex: 120,
     borderRadius: '9999px',
-    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+    border: '1px solid rgba(255,255,255,0.18)',
+    background: 'rgba(255,255,255,0.08)',
     padding: '0.75rem 2.25rem',
     fontSize: '0.875rem',
     fontWeight: 700,
     color: '#fff',
     letterSpacing: '0.05em',
     textDecoration: 'none',
-    boxShadow: '0 10px 20px -10px rgba(139, 92, 246, 0.6), inset 0 1px 0 rgba(255,255,255,0.2)',
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.08), 0 20px 60px -32px rgba(0,0,0,0.8)',
+    backdropFilter: 'blur(64px) saturate(150%)',
+    WebkitBackdropFilter: 'blur(64px) saturate(150%)',
     display: 'inline-flex',
   },
   pill: {

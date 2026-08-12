@@ -16,6 +16,7 @@ import { speakers } from '../data/speakers';
 import { schedule, scheduleColors } from '../data/schedule';
 import { RevealText, RevealBreath, StaggerGroup, StaggerItem } from '../components/animations/Reveal';
 import SwitchEventCard from '../components/SwitchEventCard.jsx';
+import TimelineSchedule from '../components/TimelineSchedule.jsx';
 
 /* ─── Constants & Data ─── */
 const SPONSORS = ["HP", "DELL", "GOOGLE", "COCO COLA", "REDBULL", "JAVA"];
@@ -35,7 +36,7 @@ const FAQS = [
   ],
   [
     "Can I attend just the talks?",
-    "Yes — all tech talks are free to attend, but seats are allotted on registration order.",
+    "Yes — all TED talks are free to attend, but seats are allotted on registration order.",
   ],
 ];
 
@@ -159,27 +160,32 @@ export default function Home() {
             <Link
               to="/register"
               onClick={triggerRegisterSlide}
-              className="ticket-btn"
+              className="hero-register-btn"
               style={{
                 position: 'relative',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(to bottom, #fde047, #eab308)',
+                background: '#ffffff',
                 padding: '1.25rem 4rem',
+                borderRadius: '9999px',
                 fontSize: '1.125rem',
-                fontWeight: 700,
-                color: '#000',
+                fontWeight: 800,
+                color: '#000000',
+                letterSpacing: '0.05em',
                 textDecoration: 'none',
-                clipPath: 'polygon(5% 0, 95% 0, 100% 15%, 100% 85%, 95% 100%, 5% 100%, 0 85%, 0 15%)',
-                border: 'none',
+                boxShadow: '0 4px 14px 0 rgba(255, 255, 255, 0.39)',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 255, 255, 0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 4px 14px 0 rgba(255, 255, 255, 0.39)';
               }}
             >
-              <div style={{
-                position: 'absolute', inset: '4px',
-                border: '2px dashed rgba(0,0,0,0.5)',
-                clipPath: 'polygon(5% 0, 95% 0, 100% 15%, 100% 85%, 95% 100%, 5% 100%, 0 85%, 0 15%)',
-              }} />
               <span style={{ position: 'relative', zIndex: 10 }}>Register Now</span>
             </Link>
             <FlipClock />
@@ -202,7 +208,7 @@ export default function Home() {
           paddingTop: '2rem'
         }}
       >
-        <div style={{ width: '100%', overflow: 'hidden', padding: '2rem 0 5rem 0' }}>
+        <div style={{ width: '100%', overflow: 'hidden', padding: '2rem 0 5rem 0', display: 'flex', justifyContent: 'center' }}>
           <SwitchEventCard />
         </div>
         
@@ -467,37 +473,7 @@ export default function Home() {
             <h2 className="section-title">Schedule</h2>
           </RevealText>
           <RevealBreath delay={0.1} style={{ marginTop: '2rem' }}>
-            <div style={styles.tabs}>
-              {[
-                { key: 'day1', label: 'Day 1 · 12 Sept' },
-                { key: 'day2', label: 'Day 2 · 13 Sept' },
-              ].map(tab => (
-                <button
-                  key={tab.key}
-                  onClick={() => setSchedDay(tab.key)}
-                  style={{
-                    ...styles.tab,
-                    background: schedDay === tab.key ? 'rgba(255,255,255,0.1)' : 'transparent',
-                    color: schedDay === tab.key ? '#fff' : 'rgba(255,255,255,0.5)',
-                  }}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-            <div style={styles.scheduleList}>
-              {schedule[schedDay].map((row, i) => (
-                <Link
-                  key={i}
-                  to="/events"
-                  style={styles.schedRow}
-                >
-                  <span style={{ ...styles.schedTime, color: scheduleColors[row.category] || '#22d3ee' }}>{row.time}</span>
-                  <span style={styles.schedTitle}>{row.title}</span>
-                  <span style={styles.schedVenue}>{row.venue}</span>
-                </Link>
-              ))}
-            </div>
+            <TimelineSchedule schedDay={schedDay} setSchedDay={setSchedDay} />
           </RevealBreath>
         </section>
 

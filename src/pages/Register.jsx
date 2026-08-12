@@ -1,11 +1,12 @@
 // src/pages/Register.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Copy, CheckCircle, ChevronDown } from 'lucide-react';
 import { events as staticEvents } from '../data/events';
 import { QRCodeSVG } from 'qrcode.react';
-import { fetchEvents, registerForEvent } from '../lib/supabase';
+import { fetchEvents, registerForEvent, holdSeat } from '../lib/supabase';
+import SwitchRulesCard from '../components/SwitchRulesCard';
 
 /* ─── Constants (mirrors FEST / register.tsx) ─── */
 const UPI_ID = 'thakurayush670@oksbi';
@@ -59,6 +60,33 @@ export default function Register() {
   const [toastMsg, setToastMsg] = useState(null);  // { text, ok }
   const [copied, setCopied] = useState(false);
   const [events, setEvents] = useState(staticEvents);
+  const [holdToken, setHoldToken] = useState(null);
+  const [expiresAt, setExpiresAt] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  const holdInProgress = useRef(false);
+
+  // Sync timeLeft when expiresAt or step changes
+  useEffect(() => {
+    if (!expiresAt) return;
+    const update = () => {
+      const left = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+      setTimeLeft(left);
+      if (left === 0) {
+        setStep(0);
+        setForm(f => {
+          if (f.event_id) sessionStorage.removeItem(`hold_${f.event_id}`);
+          return { ...f, event_id: '' };
+        });
+        setHoldToken(null);
+        setExpiresAt(null);
+        setToastMsg({ text: "Seat hold expired. Please select the event again.", ok: false });
+      }
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
 
   const [form, setForm] = useState({
     full_name: '',
@@ -76,16 +104,89 @@ export default function Register() {
     event_id: preselectedId,
     utr_number: '',
     is_smit_student: false,
+    accommodation: false,
   });
 
+  const [showRules, setShowRules] = useState(false);
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  
+
   // Sync URL parameter if it changes
   useEffect(() => {
     if (preselectedId) {
       setForm(f => ({ ...f, event_id: preselectedId }));
     }
   }, [preselectedId]);
+
+  // Hold seat automatically when event_id is selected
+  useEffect(() => {
+    if (!form.event_id) {
+      setHoldToken(null);
+      setExpiresAt(null);
+      return;
+    }
+
+    // Check sessionStorage first
+    const storedHoldStr = sessionStorage.getItem(`hold_${form.event_id}`);
+    if (storedHoldStr) {
+      try {
+        const storedHold = JSON.parse(storedHoldStr);
+        if (new Date(storedHold.expires_at).getTime() > Date.now()) {
+          setHoldToken(storedHold.hold_token);
+          setExpiresAt(storedHold.expires_at);
+          return; // Use stored hold, skip API call
+        } else {
+          sessionStorage.removeItem(`hold_${form.event_id}`);
+        }
+      } catch (e) {
+        sessionStorage.removeItem(`hold_${form.event_id}`);
+      }
+    }
+
+    if (holdInProgress.current) return;
+
+    let isActive = true;
+    holdInProgress.current = true;
+
+    const attemptHold = async () => {
+      try {
+        const holdResult = await holdSeat(form.event_id);
+        if (isActive) {
+          setHoldToken(holdResult.hold_token);
+          setExpiresAt(holdResult.expires_at);
+          sessionStorage.setItem(`hold_${form.event_id}`, JSON.stringify({
+            hold_token: holdResult.hold_token,
+            expires_at: holdResult.expires_at
+          }));
+        }
+      } catch (err) {
+        if (isActive) {
+          console.error("Hold seat error:", err);
+          if (err.message && err.message.includes("fully booked")) {
+            setToastMsg({ text: "Sorry, this event is fully booked.", ok: false });
+          } else {
+            setToastMsg({ text: "Something went wrong reserving the seat. Please try again.", ok: false });
+          }
+          // Refresh events to show updated seats
+          fetchEvents().then(data => {
+            if (data && data.length > 0) setEvents(data.map(d => ({ ...d, title: d.name || d.title })));
+          }).catch(e => console.error(e));
+
+          setForm(f => ({ ...f, event_id: '' }));
+          setHoldToken(null);
+          setExpiresAt(null);
+        }
+      } finally {
+        if (isActive) holdInProgress.current = false;
+      }
+    };
+    attemptHold();
+
+    return () => {
+      isActive = false;
+      holdInProgress.current = false;
+    };
+  }, [form.event_id]);
 
   const selected = events.find(e => String(e.id) === String(form.event_id));
   const isTeamEvent = selected?.type === 'team' || selected?.is_team || String(selected?.title || selected?.name).toLowerCase().includes('hackathon') || String(selected?.title || selected?.name).toLowerCase().includes('flag') || false;
@@ -98,7 +199,8 @@ export default function Register() {
     }).catch(err => console.error("Failed to fetch events", err));
   }, []);
   const amount = Number(selected?.price ?? 0);
-  const amountDue = form.is_smit_student ? 0 : amount;
+  const accommodationPrice = form.accommodation ? 500 : 0;
+  const amountDue = form.is_smit_student ? 0 : amount + accommodationPrice;
   const steps = form.is_smit_student ? SMIT_STEPS : STEPS;
   const displayedStep = form.is_smit_student && step === 3 ? 2 : step;
 
@@ -118,7 +220,7 @@ export default function Register() {
     return () => clearTimeout(t);
   }, [toastMsg]);
 
-  async function submitRegistration(formState) {
+  async function submitRegistration(formState, tokenToUse = holdToken) {
     setSubmitting(true);
     setErrors({});
     try {
@@ -135,9 +237,12 @@ export default function Register() {
         eventId: formState.event_id,
         utrId: formState.utr_number || "SMIT_FREE",
         collegeRegNo: formState.registration_no || null,
+        holdToken: tokenToUse,
+        accommodation: formState.accommodation,
       });
       setRegId(newId || genRegId());
       setStep(3);
+      sessionStorage.removeItem(`hold_${formState.event_id}`);
       setToastMsg({ text: 'Registration confirmed ✓', ok: true });
     } catch (err) {
       if (err.message && err.message.includes("fully booked")) {
@@ -160,10 +265,16 @@ export default function Register() {
   async function nextFromDetails() {
     const errs = validateDetails(form, isTeamEvent);
     if (Object.keys(errs).length) { setErrors(errs); return; }
+
+    if (!holdToken) {
+      setToastMsg({ text: "Please wait, confirming seat availability...", ok: false });
+      return;
+    }
+
     setErrors({});
 
     if (form.is_smit_student) {
-      await submitRegistration(form);
+      await submitRegistration(form, holdToken);
       return;
     }
     setStep(1);
@@ -241,6 +352,12 @@ export default function Register() {
             {/* ── Step 0: Your details ── */}
             {step === 0 && (
               <motion.div key="details" {...fade} style={styles.stepBody}>
+                {holdToken && (
+                  <div style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                    Seat reserved for {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
+                  </div>
+                )}
                 <Field id="full_name" label="Full name" error={errors.full_name} required>
                   <input id="full_name" type="text" placeholder="Arjun Sharma"
                     value={form.full_name}
@@ -364,6 +481,46 @@ export default function Register() {
                   </span>
                 </label>
 
+                {/* Accommodation checkbox */}
+                {!form.is_smit_student && (
+                  <div style={{ ...styles.smitLabel, flexDirection: 'column', alignItems: 'stretch', gap: '4px', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer', margin: 0 }} htmlFor="accommodation">
+                        <input id="accommodation" type="checkbox"
+                          checked={form.accommodation}
+                          onChange={e => set('accommodation', e.target.checked)}
+                          style={styles.checkbox}
+                        />
+                        <span>
+                          <span style={{ ...styles.smitBold, marginBottom: 0 }}>I need accommodation (includes charges)</span>
+                        </span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowRules(true);
+                        }}
+                        style={{ 
+                          background: 'rgba(0, 195, 227, 0.1)', 
+                          border: '1px solid rgba(0, 195, 227, 0.3)', 
+                          color: '#00c3e3', 
+                          textDecoration: 'none', 
+                          cursor: 'pointer', 
+                          fontWeight: '600', 
+                          fontSize: '12px',
+                          padding: '4px 10px',
+                          borderRadius: '12px',
+                          letterSpacing: '0.05em'
+                        }}
+                      >
+                        Rules
+                      </button>
+                    </div>
+                    <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', marginLeft: '28px' }}>*prices may vary at any time</span>
+                  </div>
+                )}
+
 
                 <button
                   type="button"
@@ -384,9 +541,13 @@ export default function Register() {
             {/* ── Step 1: Pay via UPI ── */}
             {step === 1 && (
               <motion.div key="pay" {...fade} style={{ ...styles.stepBody, alignItems: 'center', textAlign: 'center' }}>
+                <div style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                  Seat reserved for {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
+                </div>
                 <p style={styles.amountLabel}>Amount due</p>
                 <p style={styles.amountValue}>{formatPrice(amountDue)}</p>
-                <p style={styles.eventName}>{selected?.title}</p>
+                <p style={styles.eventName}>{selected?.title} {form.accommodation ? '+ Accommodation' : ''}</p>
                 <div style={styles.qrWrap}>
                   <QRCodeSVG
                     value={`upi://pay?pa=${UPI_ID}&pn=TECH%20ADRISHTA&am=${amountDue}&cu=INR`}
@@ -460,6 +621,38 @@ export default function Register() {
           </AnimatePresence>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showRules && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={() => setShowRules(false)}
+          >
+            <motion.div
+              initial={{ y: -1000 }}
+              animate={{ y: 0 }}
+              exit={{ y: -1000 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+              style={{ width: '100%', maxWidth: '1100px' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <SwitchRulesCard onClose={() => setShowRules(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

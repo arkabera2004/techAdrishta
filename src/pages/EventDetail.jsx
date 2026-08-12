@@ -1,13 +1,48 @@
 // src/pages/EventDetail.jsx
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, Clock, MapPin, Users, BadgeCheck } from 'lucide-react';
 import { events, getCategoryTheme } from '../data/events';
+import { fetchEvents, supabase } from '../lib/supabase';
 
 export default function EventDetail() {
   const { id }     = useParams();
   const navigate   = useNavigate();
-  const event      = events.find(e => e.id === id);
+  const staticEvent = events.find(e => e.id === id);
+  const [event, setEvent] = useState(staticEvent);
+
+  useEffect(() => {
+    if (!staticEvent) return;
+    fetchEvents().then(data => {
+      const dbMatch = data.find(d => d.id === id);
+      if (dbMatch) {
+        setEvent(prev => ({
+          ...prev,
+          title: dbMatch.name,
+          price: dbMatch.price,
+          seatsLeft: dbMatch.seats_left,
+          seatLimit: dbMatch.seat_limit,
+          type: dbMatch.type,
+          event_date: dbMatch.event_date,
+          event_time: dbMatch.event_time,
+          venue: dbMatch.venue || prev.venue
+        }));
+      }
+    }).catch(err => console.error("Failed to fetch event", err));
+
+    const channel = supabase
+      .channel("events-availability")
+      .on("broadcast", { event: "seats_updated" }, ({ payload }) => {
+        console.log("BROADCAST PAYLOAD (EventDetail):", payload);
+        if (payload.event_id === id) {
+          setEvent(prev => prev ? { ...prev, seatsLeft: payload.seats_left } : prev);
+        }
+      })
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [id, staticEvent]);
 
   if (!event) {
     return (
@@ -65,10 +100,14 @@ export default function EventDetail() {
               <h2 style={styles.boxTitle}>Event Details</h2>
               <div style={styles.infoGrid}>
                 {[
-                  { icon: <Calendar size={16}/>, label: 'Date',       value: event.date      },
-                  { icon: <Clock    size={16}/>, label: 'Time',       value: event.time      },
+                  { icon: <Calendar size={16}/>, label: 'Date',       value: event.event_date && event.event_time
+                    ? new Date(`${event.event_date}T${event.event_time}`).toLocaleString("en-IN", { day: "numeric", month: "short" })
+                    : event.date },
+                  { icon: <Clock    size={16}/>, label: 'Time',       value: event.event_date && event.event_time
+                    ? new Date(`${event.event_date}T${event.event_time}`).toLocaleString("en-IN", { hour: "numeric", minute: "2-digit" })
+                    : event.time },
                   { icon: <MapPin   size={16}/>, label: 'Venue',      value: event.venue     },
-                  { icon: <Users    size={16}/>, label: 'Seats left', value: `${event.seatsLeft} / ${event.seats}` },
+                  { icon: <Users    size={16}/>, label: 'Seats left', value: `${event.seatsLeft} / ${event.seatLimit || event.seats}` },
                 ].map(({ icon, label, value }) => (
                   <div key={label} style={styles.infoItem}>
                     <span style={styles.infoIcon}>{icon}</span>

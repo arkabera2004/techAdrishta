@@ -4,7 +4,7 @@ import { Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import TicketCard from '../components/TicketCard';
 import { events } from '../data/events';
-import { fetchEvents } from '../lib/supabase';
+import { fetchEvents, supabase } from '../lib/supabase';
 
 const CATEGORIES = ['All', 'Hackathon', 'TED Talk', 'Workshop', 'Competition'];
 const CAT_KEY = { 'Hackathon': 'hackathon', 'TED Talk': 'tedtalk', 'Workshop': 'workshop', 'Competition': 'competition' };
@@ -29,13 +29,32 @@ export default function Events() {
               price: dbMatch.price,
               seatsLeft: dbMatch.seats_left,
               seatLimit: dbMatch.seat_limit,
-              type: dbMatch.type
+              type: dbMatch.type,
+              event_date: dbMatch.event_date,
+              event_time: dbMatch.event_time,
+              venue: dbMatch.venue || staticEv.venue
             };
           }
           return staticEv;
         }));
       }
     }).catch(err => console.error("Failed to fetch events", err));
+
+    const channel = supabase
+      .channel("events-availability")
+      .on("broadcast", { event: "seats_updated" }, ({ payload }) => {
+        console.log("BROADCAST PAYLOAD (Events):", payload);
+        setEventsList((prev) =>
+          prev.map((e) =>
+            e.id === payload.event_id
+              ? { ...e, seatsLeft: payload.seats_left }
+              : e
+          )
+        );
+      })
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
   }, []);
 
   const filtered = useMemo(() => {

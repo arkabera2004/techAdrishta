@@ -47,6 +47,7 @@
 /* Base styles (Mobile first) */
 .timeline-line-wrapper {
   left: 1rem;
+  margin-left: -2px; /* Center the 4px line exactly on the 1rem mark */
 }
 
 .timeline-item {
@@ -60,7 +61,7 @@
 .timeline-node {
   position: absolute;
   left: 1rem;
-  transform: translateX(-50%);
+  margin-left: -8px; /* Used instead of transform to avoid conflict with Framer Motion scale */
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -85,7 +86,6 @@
 @media (min-width: 768px) {
   .timeline-line-wrapper {
     left: 50%;
-    transform: translateX(-50%);
   }
 
   .timeline-node {

@@ -9,7 +9,7 @@ export default function TechTalks() {
 
         {/* ── Page header ── */}
         <h1 style={styles.title}>
-          Tech <span style={styles.gradient}>Talks</span>
+          Tech <span style={styles.gradient}>Talk</span>
         </h1>
         <p style={styles.subtitle}>
           Practitioners only. Every session comes from someone running the thing in production.

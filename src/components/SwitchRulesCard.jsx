@@ -16,20 +16,20 @@ import { useEffect, useRef, useState } from "react";
  *   global CSS/<head> instead of the runtime injection below, for reliability.
  */
 
-const EVENT = {
-    heading: "About the event",
-    paragraphs: [
-        "TECH ADRISHTA started as a dorm-room hackathon and grew into the largest independent tech fest in the region. Two days, four tracks, and a single rule: everything you present has to actually run.",
-        "Expect engineers who ship at scale, founders mid-raise, and security researchers who break things on stage. No keynote fluff.",
+const RULES = [
+    [
+        "Accommodation will be provided strictly on a first-come, first-served basis upon prior booking.",
+        "Advance payment must be completed for accommodation.",
+        "A screenshot or proof of payment must be shared with the overall coordinators."
     ],
-    tracksTitle: "Four tracks",
-    tracks: [
-        { name: "Build", desc: "36-hour hackathon with hardware and cloud credits." },
-        { name: "Learn", desc: "hands-on workshops capped at 60 seats." },
-        { name: "Listen", desc: "talks from people running production systems." },
-        { name: "Compete", desc: "CTF, pitch arena and the gaming bracket." },
+    [
+        "Participants must adhere to hostel rules, including: Curfew timings, Cleanliness, and Proper conduct.",
+        "Any damage to hostel property will result in fines and/or disqualification."
     ],
-};
+    [
+        "Participants must vacate the accommodation within the stipulated time after KAALRAV, i.e. latest by 12:00 pm of 9th March 2026."
+    ]
+];
 
 function useGoogleFonts() {
     useEffect(() => {
@@ -44,7 +44,7 @@ function useGoogleFonts() {
     }, []);
 }
 
-export default function SwitchEventCard() {
+export default function SwitchRulesCard({ onClose }) {
     useGoogleFonts();
     const scrollRef = useRef(null);
     const [pressed, setPressed] = useState(null);
@@ -66,7 +66,7 @@ export default function SwitchEventCard() {
         setTimeout(() => setPressed(null), 120);
     };
 
-    const nextPage = () => setPage((p) => Math.min(p + 1, 1));
+    const nextPage = () => setPage((p) => Math.min(p + 1, 2));
     const prevPage = () => setPage((p) => Math.max(p - 1, 0));
 
     return (
@@ -274,60 +274,44 @@ export default function SwitchEventCard() {
                         className="switch-screen-scroll w-full h-full overflow-hidden text-[#cfcfd6]"
                         style={{ fontFamily: "'VT323', monospace", position: 'relative' }}
                     >
-                        {page === 0 && (
-                            <div className="w-full h-full flex flex-col justify-center items-start text-left animate-in fade-in duration-300" style={{ padding: '2.4cqi' }}>
-                                <h2
-                                    className="text-white tracking-wide"
-                                    style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "2.4cqi", lineHeight: "1.6", marginBottom: '1.6cqi' }}
-                                >
-                                    {EVENT.heading}
-                                </h2>
+                        <div className="w-full h-full flex flex-col justify-center items-start text-left animate-in fade-in duration-300" style={{ padding: '2.4cqi' }}>
+                            <h2
+                                className="text-white tracking-wide"
+                                style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "2.4cqi", lineHeight: "1.6", marginBottom: '1.6cqi' }}
+                            >
+                                Hostel Rules
+                            </h2>
 
-                                {EVENT.paragraphs.map((p, i) => (
-                                    <p key={i} className="leading-relaxed text-gray-300 w-full" style={{ fontSize: '2.1cqi', marginBottom: '1.6cqi' }}>
-                                        {p}
-                                    </p>
-                                ))}
+                            {RULES[page].map((p, i) => (
+                                <p key={i} className="leading-relaxed text-gray-300 w-full" style={{ fontSize: '2.1cqi', marginBottom: '1.6cqi' }}>
+                                    - {p}
+                                </p>
+                            ))}
 
-                                <div 
-                                    className="text-white flex items-center cursor-pointer"
-                                    onClick={() => press('right', nextPage)}
-                                    style={{ position: 'absolute', bottom: '2.4cqi', right: '3.2cqi', gap: '0.8cqi' }}
-                                >
-                                    <span className="animate-pulse" style={{ fontSize: '2.2cqi' }}>NEXT</span>
-                                    <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "1.4cqi", marginTop: "0.4cqi" }}>&gt;</span>
-                                </div>
-                            </div>
-                        )}
-
-                        {page === 1 && (
-                            <div className="w-full h-full flex flex-col justify-center animate-in fade-in duration-300" style={{ padding: '3.2cqi' }}>
-                                <div className="border border-gray-600 bg-white/5 shadow-lg" style={{ borderRadius: '0.8cqi', padding: '2.0cqi' }}>
-                                    <div
-                                        className="text-white text-center"
-                                        style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "2.2cqi", marginBottom: '2.0cqi' }}
+                            <div style={{ position: 'absolute', bottom: '2.4cqi', width: '90%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                {page > 0 ? (
+                                    <div 
+                                        className="text-white flex items-center cursor-pointer"
+                                        onClick={() => press('left', prevPage)}
+                                        style={{ gap: '0.8cqi' }}
                                     >
-                                        {EVENT.tracksTitle}
+                                        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "1.4cqi", marginTop: "0.4cqi" }}>&lt;</span>
+                                        <span className="animate-pulse" style={{ fontSize: '2.2cqi' }}>BACK</span>
                                     </div>
-                                    <ul style={{ display: 'flex', flexDirection: 'column', gap: '1.4cqi' }}>
-                                        {EVENT.tracks.map((t) => (
-                                            <li key={t.name} className="leading-snug text-gray-300" style={{ fontSize: '2.0cqi' }}>
-                                                <span className="text-white font-bold">{t.name}</span> — {t.desc}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
+                                ) : <div></div>}
                                 
-                                <div 
-                                    className="text-white flex items-center cursor-pointer"
-                                    onClick={() => press('left', prevPage)}
-                                    style={{ marginTop: '1.2cqi', gap: '0.8cqi', alignSelf: 'flex-start' }}
-                                >
-                                    <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "1.4cqi", marginTop: "0.4cqi" }}>&lt;</span>
-                                    <span className="animate-pulse" style={{ fontSize: '2.2cqi' }}>BACK</span>
-                                </div>
+                                {page < 2 ? (
+                                    <div 
+                                        className="text-white flex items-center cursor-pointer"
+                                        onClick={() => press('right', nextPage)}
+                                        style={{ gap: '0.8cqi' }}
+                                    >
+                                        <span className="animate-pulse" style={{ fontSize: '2.2cqi' }}>NEXT</span>
+                                        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "1.4cqi", marginTop: "0.4cqi" }}>&gt;</span>
+                                    </div>
+                                ) : <div></div>}
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 

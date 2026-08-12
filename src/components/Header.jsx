@@ -8,7 +8,7 @@ import ParticleText from './ParticleText';
 const links = [
   { to: "/", label: "Home" },
   { to: "/events", label: "Events" },
-  { to: "/tech-talks", label: "TED Talks" },
+  { to: "/tech-talks", label: "Tech Talk" },
   { to: "/gallery", label: "Gallery" },
   { to: "/team", label: "Team" },
 ];
@@ -20,7 +20,7 @@ export default function Header() {
   const [focusedPath, setFocusedPath] = useState(null);
   const location = useLocation();
   const isHome = location.pathname === "/";
-  
+
   const isActive = (to) =>
     to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
 
@@ -63,8 +63,8 @@ export default function Header() {
             text="Tech Adrishta"
             particleSize={1.5}
             density={2}
-            color="#4ade80"
-            highlightColor="#22c55e"
+            color="#e5e6e5ff"
+            highlightColor="#ffffffff"
             scatter={120}
             gatherDuration={1200}
             stagger={200}
@@ -119,7 +119,7 @@ export default function Header() {
               );
             })}
           </nav>
-          
+
           <button
             type="button"
             style={styles.hamburger}
@@ -166,7 +166,8 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .mobile-logo { width: 320px; height: 60px; }
         @media (min-width: 768px) {
           .mobile-only { display: none !important; }

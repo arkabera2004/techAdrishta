@@ -335,7 +335,14 @@ export default function TicketCard({ event, tilt = 0 }) {
               letterSpacing: '0.04em', textTransform: 'uppercase',
               color: theme.ink,
             }}>
-              <span>{event.date} · {event.time} · {event.venue}</span>
+              <span>
+                {event.event_date && event.event_time
+                  ? new Date(`${event.event_date}T${event.event_time}`).toLocaleString("en-IN", {
+                      day: "numeric", month: "short", hour: "numeric", minute: "2-digit",
+                    })
+                  : `${event.date} · ${event.time}`}
+                {' · '}{event.venue}
+              </span>
               <span style={{ fontSize: '1.125rem', fontWeight: 900 }}>
                 {event.price === 0 ? 'Free' : `₹${event.price}`}
               </span>

@@ -12,6 +12,13 @@ export async function fetchEvents() {
   return data;
 }
 
+// Step 1 — when "Register Now" is clicked, BEFORE navigating to payment
+export async function holdSeat(eventId) {
+  const { data, error } = await supabase.rpc("hold_seat", { p_event_id: eventId });
+  if (error) throw error; // "Event is fully booked"
+  return data[0]; // { hold_token, expires_at }
+}
+
 // Submit a registration atomically
 export async function registerForEvent({
   fullName,
@@ -23,6 +30,8 @@ export async function registerForEvent({
   eventId,
   utrId,
   collegeRegNo,
+  holdToken,
+  accommodation,
 }) {
   const { data, error } = await supabase.rpc("register_team", {
     p_full_name: fullName,
@@ -34,6 +43,8 @@ export async function registerForEvent({
     p_event_id: eventId,
     p_utr_id: utrId,
     p_college_reg_no: collegeRegNo || null,
+    p_hold_token: holdToken,
+    p_accommodation: accommodation || false,
   });
   if (error) throw error;
   return data; // the new registration's id

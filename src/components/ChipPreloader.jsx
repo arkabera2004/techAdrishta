@@ -182,10 +182,9 @@ export default function ChipPreloader({ onComplete, onTriggerZoomOut = () => {} 
                 ease: "power2.inOut"
             }, 1.2);
 
-            // 1.4s - 1.6s: Chip gracefully fades out
-            tl.to(chipRef.current, { 
+            // 1.4s - 1.6s: Chip and traces gracefully fade out
+            tl.to([chipRef.current, tracesRef.current], { 
                 opacity: 0, 
-                filter: 'drop-shadow(0px 0px 0px rgba(255,170,0,0))', 
                 duration: 0.2, 
                 ease: "power2.in" 
             }, 1.4);

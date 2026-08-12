@@ -58,26 +58,7 @@ export default function Header() {
           transform: hidden && !menuOpen ? 'translateY(-100%)' : 'translateY(0)',
         }}
       >
-        <Link to="/" style={styles.topLeftLogo} className="mobile-logo" onClick={() => setMenuOpen(false)}>
-          <ParticleText
-            text="Tech Adrishta"
-            particleSize={1.5}
-            density={2}
-            color="#e5e6e5ff"
-            highlightColor="#ffffffff"
-            scatter={120}
-            gatherDuration={1200}
-            stagger={200}
-            pointerRepel={30}
-            repelRadius={80}
-            idleDrift={0.5}
-            trigger="hover"
-            fontSize="clamp(1.2rem, 6vw, 2rem)"
-            fontWeight={900}
-            fontFamily="'Space Grotesk', ui-sans-serif, system-ui, sans-serif"
-            glow
-          />
-        </Link>
+
 
         <Link
           to="/register"
@@ -101,19 +82,12 @@ export default function Header() {
                   to={link.to}
                   style={{
                     ...styles.navLink,
-                    color: isTarget ? '#fff' : 'rgba(255,255,255,0.68)',
+                    color: isTarget ? 'var(--signature-gold)' : 'var(--text-muted)',
                   }}
                   onMouseEnter={() => setHoveredPath(link.to)}
                   onFocus={() => setFocusedPath(link.to)}
                   onBlur={() => setFocusedPath(null)}
                 >
-                  {isTarget && (
-                    <motion.span
-                      layoutId="site-nav-active-bubble"
-                      style={styles.activeBubble}
-                      transition={{ type: "spring", stiffness: 350, damping: 30, mass: 0.3 }}
-                    />
-                  )}
                   <span style={{ position: 'relative', zIndex: 10 }}>{link.label}</span>
                 </Link>
               );
@@ -153,8 +127,8 @@ export default function Header() {
                     onClick={() => setMenuOpen(false)}
                     style={{
                       ...styles.mobileLink,
-                      background: active ? 'rgba(255,255,255,0.06)' : 'transparent',
-                      color: active ? '#fff' : 'rgba(255,255,255,0.6)',
+                      background: active ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                      color: active ? 'var(--signature-gold)' : 'var(--text-muted)',
                     }}
                   >
                     {link.label}
@@ -183,8 +157,8 @@ export default function Header() {
             padding: 0.5rem !important;
           }
         }
-        .hover-scale { transition: transform 0.2s ease, filter 0.2s ease; }
-        .hover-scale:hover { transform: scale(1.05); filter: brightness(1.15); }
+        .hover-scale { transition: transform 0.2s ease, filter 0.2s ease, background 0.2s ease, color 0.2s ease; }
+        .hover-scale:hover { transform: scale(1.05); filter: brightness(1.15); background: var(--gold-light) !important; color: var(--bg) !important; }
       `}} />
     </>
   );
@@ -217,17 +191,15 @@ const styles = {
     right: '1.5rem',
     zIndex: 120,
     borderRadius: '9999px',
-    border: '1px solid rgba(255,255,255,0.18)',
-    background: 'rgba(255,255,255,0.08)',
+    border: 'none',
+    background: 'var(--signature-gold)',
     padding: '0.75rem 2.25rem',
     fontSize: '0.875rem',
     fontWeight: 700,
-    color: '#fff',
+    color: 'var(--bg)',
     letterSpacing: '0.05em',
     textDecoration: 'none',
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.08), 0 20px 60px -32px rgba(0,0,0,0.8)',
-    backdropFilter: 'blur(64px) saturate(150%)',
-    WebkitBackdropFilter: 'blur(64px) saturate(150%)',
+    boxShadow: '0 4px 14px rgba(212, 175, 55, 0.25)',
     display: 'inline-flex',
   },
   pill: {

@@ -24,10 +24,10 @@ export const schedule = {
 };
 
 export const scheduleColors = {
-  hackathon:   '#F97316',
-  techtalk:    '#8B5CF6',
-  workshop:    '#14B8A6',
-  competition: '#EC4899',
-  general:     '#22d3ee',
-  break:       '#6b7280',
+  hackathon:   '#C97A3D',
+  techtalk:    '#8C2F39',
+  workshop:    '#8A7A4E',
+  competition: '#8A7A4E',
+  general:     '#D4AF37',
+  break:       '#9A9488',
 };

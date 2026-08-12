@@ -108,7 +108,7 @@ export default function SwitchRulesCard({ onClose }) {
                             <stop offset="100%" stopColor="#0f0f10" />
                         </radialGradient>
                         <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="160%">
-                            <feDropShadow dx="0" dy="16" stdDeviation="24" floodColor="#000" floodOpacity="0.4" />
+                            <feDropShadow dx="0" dy="16" stdDeviation="32" floodColor="#d4af37" floodOpacity="0.15" />
                         </filter>
                         <filter id="buttonShadow" x="-30%" y="-30%" width="160%" height="160%">
                             <feDropShadow dx="0" dy="2.5" stdDeviation="1.5" floodColor="#000" floodOpacity="0.75" />
@@ -272,12 +272,12 @@ export default function SwitchRulesCard({ onClose }) {
                     <div
                         ref={scrollRef}
                         className="switch-screen-scroll w-full h-full overflow-hidden text-[#cfcfd6]"
-                        style={{ fontFamily: "'VT323', monospace", position: 'relative' }}
+                        style={{ fontFamily: "var(--font-mono)", position: 'relative' }}
                     >
                         <div className="w-full h-full flex flex-col justify-center items-start text-left animate-in fade-in duration-300" style={{ padding: '2.4cqi' }}>
                             <h2
                                 className="text-white tracking-wide"
-                                style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "2.4cqi", lineHeight: "1.6", marginBottom: '1.6cqi' }}
+                                style={{ fontFamily: "var(--font-mono)", fontSize: "2.4cqi", lineHeight: "1.6", marginBottom: '1.6cqi' }}
                             >
                                 Hostel Rules
                             </h2>
@@ -291,23 +291,23 @@ export default function SwitchRulesCard({ onClose }) {
                             <div style={{ position: 'absolute', bottom: '2.4cqi', width: '90%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 {page > 0 ? (
                                     <div 
-                                        className="text-white flex items-center cursor-pointer"
+                                        className="flex items-center cursor-pointer hover-scale-nav"
                                         onClick={() => press('left', prevPage)}
-                                        style={{ gap: '0.8cqi' }}
+                                        style={{ gap: '0.8cqi', color: 'var(--signature-gold)' }}
                                     >
-                                        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "1.4cqi", marginTop: "0.4cqi" }}>&lt;</span>
-                                        <span className="animate-pulse" style={{ fontSize: '2.2cqi' }}>BACK</span>
+                                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.4cqi", marginTop: "0.4cqi" }}>&lt;</span>
+                                        <span className="animate-pulse" style={{ fontSize: '2.2cqi', fontFamily: 'var(--font-mono)' }}>BACK</span>
                                     </div>
                                 ) : <div></div>}
                                 
                                 {page < 2 ? (
                                     <div 
-                                        className="text-white flex items-center cursor-pointer"
+                                        className="flex items-center cursor-pointer hover-scale-next"
                                         onClick={() => press('right', nextPage)}
-                                        style={{ gap: '0.8cqi' }}
+                                        style={{ gap: '0.8cqi', color: 'var(--bg)', backgroundColor: 'var(--signature-gold)', border: '1px solid var(--signature-gold)', padding: '0.4cqi 1cqi', borderRadius: '4px' }}
                                     >
-                                        <span className="animate-pulse" style={{ fontSize: '2.2cqi' }}>NEXT</span>
-                                        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "1.4cqi", marginTop: "0.4cqi" }}>&gt;</span>
+                                        <span className="animate-pulse" style={{ fontSize: '2.0cqi', fontFamily: 'var(--font-mono)' }}>NEXT</span>
+                                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.4cqi", marginTop: "0.4cqi" }}>&gt;</span>
                                     </div>
                                 ) : <div></div>}
                             </div>

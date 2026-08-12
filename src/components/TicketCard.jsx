@@ -390,6 +390,7 @@ export default function TicketCard({ event, tilt = 0 }) {
         }}>
           {/* Metadata */}
           <div style={{
+            fontFamily: 'var(--font-mono)',
             fontSize: '9px', lineHeight: 1.7,
             fontWeight: 700, letterSpacing: '0.16em',
             textTransform: 'uppercase', opacity: 0.8, color: theme.ink,
@@ -423,7 +424,7 @@ export default function TicketCard({ event, tilt = 0 }) {
               fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '0.6875rem', fontWeight: 900,
               letterSpacing: '0.18em', textTransform: 'uppercase',
-              background: theme.ink, color: theme.accent,
+              background: 'var(--signature-gold)', color: 'var(--bg)',
               opacity: isSoldOut ? 0.6 : 1,
             }}
             id={`register-btn-${event.id}`}

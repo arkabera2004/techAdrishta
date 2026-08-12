@@ -52,7 +52,7 @@ export default function Footer() {
 const styles = {
   footer: {
     position: 'relative',
-    backgroundImage: 'url(/footer1.jpeg)',
+    // backgroundImage: 'url(/footer1.jpeg)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     borderTop: 'none',

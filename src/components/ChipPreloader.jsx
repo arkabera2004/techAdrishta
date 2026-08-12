@@ -101,7 +101,7 @@ const TRACES_DATA = (() => {
     return traces;
 })();
 
-export default function ChipPreloader({ onComplete }) {
+export default function ChipPreloader({ onComplete, onTriggerZoomOut = () => {} }) {
     const overlayRef = useRef(null);
     const chipRef = useRef(null);
     const tracesRef = useRef(null);
@@ -172,7 +172,17 @@ export default function ChipPreloader({ onComplete }) {
                 ease: "power2.in"
             }, 1.3);
 
-            // 1.4s - 1.6s: Chip and overlay gracefully fade out
+            // Trigger zoom out right before chip fades out
+            tl.call(onTriggerZoomOut, null, 1.2);
+
+            // Fade preloader background so the zoom out is visible
+            tl.to(overlayRef.current, {
+                backgroundColor: 'rgba(10,10,12,0)',
+                duration: 0.2,
+                ease: "power2.inOut"
+            }, 1.2);
+
+            // 1.4s - 1.6s: Chip gracefully fades out
             tl.to(chipRef.current, { 
                 opacity: 0, 
                 filter: 'drop-shadow(0px 0px 0px rgba(255,170,0,0))', 
@@ -180,16 +190,13 @@ export default function ChipPreloader({ onComplete }) {
                 ease: "power2.in" 
             }, 1.4);
 
-            tl.to(overlayRef.current, {
-                opacity: 0,
-                duration: 0.2,
-                ease: "power2.inOut"
-            }, 1.5);
+            // Wait a moment after chip fades before completing
+            tl.to({}, { duration: 0.1 }, 1.6);
 
         }, overlayRef);
 
         return () => ctx.revert();
-    }, [onComplete]);
+    }, []);
 
     return (
         <div 
@@ -200,7 +207,7 @@ export default function ChipPreloader({ onComplete }) {
                 left: 0,
                 width: '100vw',
                 height: '100vh',
-                backgroundColor: '#000000',
+                backgroundColor: '#0a0a0c',
                 zIndex: 9999,
                 margin: 0,
                 padding: 0
@@ -247,7 +254,7 @@ export default function ChipPreloader({ onComplete }) {
                 </defs>
 
                 {/* Traces Group */}
-                <g ref={tracesRef}>
+                <g ref={tracesRef} style={{ opacity: 0 }}>
                     {TRACES_DATA.map((t) => (
                         <g key={`trace-${t.id}`}>
                             <path

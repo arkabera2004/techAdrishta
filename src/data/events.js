@@ -197,10 +197,10 @@ export const events = [
 
 export const getCategoryTheme = (category) => {
   const themes = {
-    hackathon:   { base: '#F97316', accent: '#EF4444', ink: '#1c0a00', label: 'Hackathon',   pattern: 'circuit' },
-    tedtalk:    { base: '#8B5CF6', accent: '#C084FC', ink: '#1a0a2e', label: 'TED Talk',   pattern: 'waves'   },
-    workshop:    { base: '#14B8A6', accent: '#FACC15', ink: '#001a18', label: 'Workshop',    pattern: 'gears'   },
-    competition: { base: '#EC4899', accent: '#3B82F6', ink: '#1a0022', label: 'Competition', pattern: 'grid'    },
+    hackathon:   { base: '#C97A3D', accent: '#D9894C', ink: '#1A0E07', label: 'Hackathon',   pattern: 'circuit' },
+    tedtalk:     { base: '#8C2F39', accent: '#9E3944', ink: '#1F0A0C', label: 'TED Talk',    pattern: 'waves'   },
+    workshop:    { base: '#8A7A4E', accent: '#9B8B5B', ink: '#1B170E', label: 'Workshop',    pattern: 'gears'   },
+    competition: { base: '#8A7A4E', accent: '#9B8B5B', ink: '#1B170E', label: 'Competition', pattern: 'grid'    },
   };
   return themes[category] || themes.tedtalk;
 };

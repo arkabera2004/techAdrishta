@@ -69,7 +69,7 @@ export default function Gallery() {
         justifyContent: 'center',
         boxShadow: '0 -20px 50px rgba(0,0,0,0.8)'
       }}>
-        <div style={{ width: '100%', maxWidth: '800px', padding: '4rem 1rem' }}>
+        <div style={{ width: '100%', maxWidth: '800px', padding: '4rem 1rem 18rem' }}>
           <RetroTV
             videos={[
               { name: "video1", videoUrl: "/videos/video1.mov" },

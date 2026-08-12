@@ -228,7 +228,7 @@ export default function Register() {
 
   const handleBack = () => {
     if (holdToken) {
-      releaseHold(holdToken).catch(() => {});
+      releaseHold(holdToken).catch(() => { });
       setHoldToken(null);
       setExpiresAt(null);
       sessionStorage.removeItem(`hold_${form.event_id}`);
@@ -320,9 +320,9 @@ export default function Register() {
               style={{
                 ...styles.stepPill,
                 background: i <= displayedStep
-                  ? 'linear-gradient(135deg, #8b5cf6, #d946ef)'
+                  ? 'var(--signature-gold)'
                   : 'rgba(255,255,255,0.07)',
-                color: i <= displayedStep ? '#fff' : 'rgba(255,255,255,0.35)',
+                color: i <= displayedStep ? 'var(--bg)' : 'rgba(255,255,255,0.35)',
                 border: i <= displayedStep
                   ? 'none'
                   : '1px solid rgba(255,255,255,0.08)',
@@ -543,10 +543,10 @@ export default function Register() {
                             <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>Gender</label>
                             <div style={{ display: 'flex', gap: '1rem' }}>
                               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
-                                <input type="radio" name="solo_gender" value="Male" checked={form.solo_gender === 'Male'} onChange={() => set('solo_gender', 'Male')} style={{ accentColor: '#8b5cf6' }} /> Male
+                                <input type="radio" name="solo_gender" value="Male" checked={form.solo_gender === 'Male'} onChange={() => set('solo_gender', 'Male')} style={{ accentColor: 'var(--signature-gold)' }} /> Male
                               </label>
                               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
-                                <input type="radio" name="solo_gender" value="Female" checked={form.solo_gender === 'Female'} onChange={() => set('solo_gender', 'Female')} style={{ accentColor: '#8b5cf6' }} /> Female
+                                <input type="radio" name="solo_gender" value="Female" checked={form.solo_gender === 'Female'} onChange={() => set('solo_gender', 'Female')} style={{ accentColor: 'var(--signature-gold)' }} /> Female
                               </label>
                             </div>
                           </div>
@@ -770,7 +770,7 @@ const styles = {
   container: {
     maxWidth: '42rem',
     margin: '0 auto',
-    padding: '3rem 1.25rem 6rem',
+    padding: '3rem 1.25rem 18rem',
     display: 'flex',
     flexDirection: 'column',
     gap: '1.75rem',
@@ -784,7 +784,7 @@ const styles = {
     lineHeight: 1.1,
   },
   gradient: {
-    background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+    background: 'var(--gradient-gold)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
@@ -863,7 +863,7 @@ const styles = {
     width: '16px',
     height: '16px',
     marginTop: '3px',
-    accentColor: '#8b5cf6',
+    accentColor: 'var(--signature-gold)',
     cursor: 'pointer',
     flexShrink: 0,
   },
@@ -896,8 +896,8 @@ const styles = {
     width: '100%',
     padding: '13px',
     borderRadius: '999px',
-    background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
-    color: '#fff',
+    background: 'var(--signature-gold)',
+    color: 'var(--bg)',
     fontWeight: 700,
     fontSize: '0.9375rem',
     fontFamily: "'Space Grotesk', sans-serif",
@@ -930,7 +930,7 @@ const styles = {
     fontFamily: "'Space Grotesk', sans-serif",
     fontWeight: 800,
     fontSize: 'clamp(2rem, 6vw, 2.75rem)',
-    background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+    background: 'var(--gradient-gold)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
@@ -1001,7 +1001,7 @@ const styles = {
     marginTop: '0.25rem',
   },
   regId: {
-    fontFamily: 'ui-monospace, Consolas, monospace',
+    fontFamily: 'var(--font-mono)',
     fontSize: '1.0625rem',
     color: '#22d3ee',
     background: 'rgba(34,211,238,0.1)',

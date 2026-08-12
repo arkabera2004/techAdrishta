@@ -13,7 +13,7 @@ const CAT_KEY = { 'Hackathon': 'hackathon', 'TED Talk': 'tedtalk', 'Workshop': '
 
 export default function Events() {
   const [filter, setFilter] = useState('All');
-  const [query,  setQuery]  = useState('');
+  const [query, setQuery] = useState('');
   const [eventsList, setEventsList] = useState(events);
 
   useEffect(() => {
@@ -101,9 +101,9 @@ export default function Events() {
                 style={{
                   ...styles.filterPill,
                   background: filter === cat
-                    ? 'linear-gradient(135deg, #8b5cf6, #d946ef)'
+                    ? 'var(--signature-gold)'
                     : 'rgba(255,255,255,0.06)',
-                  color: filter === cat ? '#fff' : 'rgba(255,255,255,0.55)',
+                  color: filter === cat ? 'var(--bg)' : 'var(--text-muted)',
                   border: filter === cat
                     ? 'none'
                     : '1px solid rgba(255,255,255,0.1)',
@@ -176,7 +176,7 @@ const styles = {
   container: {
     maxWidth: '72rem',
     margin: '0 auto',
-    padding: '3rem 1.25rem 6rem',
+    padding: '3rem 1.25rem 12rem',
   },
   pageHeader: {
     marginBottom: '2.5rem',
@@ -190,7 +190,7 @@ const styles = {
     marginBottom: '0.75rem',
   },
   gradientSpan: {
-    background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+    background: 'var(--gradient-gold)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',

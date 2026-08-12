@@ -1,6 +1,6 @@
 // src/pages/Home.jsx
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 
@@ -86,8 +86,16 @@ function StickyTicket({ event, index, baseTilt }) {
 
 /* ─── Page Component ─── */
 export default function Home() {
+  const context = useOutletContext();
+  const bootSequenceTriggered = context?.bootSequenceTriggered ?? true;
   const [schedDay, setSchedDay] = useState('day1');
   const [openFaq, setOpenFaq] = useState(null);
+
+  const [bootState, setBootState] = useState('A');
+  const [mobileStartClicked, setMobileStartClicked] = useState(false);
+
+  const showHeroDetails = bootState === 'D' || bootState === 'E';
+  const showMobileStart = bootState === 'D' && !mobileStartClicked;
 
   const panelARef = useRef(null);
   const { scrollYProgress: panelAProgress } = useScroll({
@@ -159,87 +167,71 @@ export default function Home() {
 
   return (
     <main style={{ backgroundColor: '#000', paddingTop: 0 }}>
-      {/* ─── HERO (Sticky Layer) ─── */}
-      <section style={{ position: 'sticky', top: 0, minHeight: '100dvh', zIndex: 0, display: 'flex', flexDirection: 'column' }}>
-        <motion.div style={{ scale: heroScale, opacity: heroOpacity, y: heroY, flex: 1, display: 'flex', flexDirection: 'column', transformOrigin: 'center top' }}>
-          <section style={styles.heroSection}>
-            {/* Background Layers */}
-            <div
-              style={{
-                position: 'absolute', inset: 0,
-                backgroundImage: "url('/backgroundimage.jpeg')",
-                backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
-                opacity: 0.35, zIndex: 0
-              }}
-              aria-hidden="true"
-            />
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1 }} aria-hidden="true" />
-            <div style={{ position: 'absolute', inset: 0, opacity: 0.4, backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '56px 56px', zIndex: 1 }} aria-hidden="true" />
+      {/* ─── NEW HERO ─── */}
+      <section style={{ 
+          minHeight: '100svh', 
+          backgroundColor: '#0A0908', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          position: 'relative',
+          paddingTop: 0,
+          overflow: 'hidden'
+      }}>
+          {/* Radial glow */}
+          <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '80vw',
+              height: '80vw',
+              maxWidth: '800px',
+              maxHeight: '800px',
+              background: 'radial-gradient(circle, rgba(212,175,55,0.06) 0%, rgba(212,175,55,0) 70%)',
+              pointerEvents: 'none',
+              zIndex: 0
+          }} />
 
-            {/* Hero Content */}
-            <div style={styles.heroContent}>
-              <motion.p
-                initial="hidden" animate="visible" variants={revealText}
-                style={styles.heroEyebrow}
-              >
-                {FEST.dates} · {FEST.venue}
-              </motion.p>
+          <div style={{ flex: 1, width: '100%' }} />
 
-              <motion.h1
-                initial="hidden" animate="visible" variants={revealText}
-                style={styles.heroTitle}
-              >
-                {FEST.name}
-              </motion.h1>
+          <div style={{ zIndex: 10, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <SwitchEventCard onBootStateChange={setBootState} isZoomingOut={bootSequenceTriggered} />
+          </div>
 
-              <motion.p
-                initial="hidden" animate="visible" variants={revealText}
-                style={styles.heroTagline}
-              >
-                Two days of building, breaking and shipping. A hackathon, a stage,<br />
-                a lab and a leaderboard — all under one roof.
-              </motion.p>
+          <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
 
-              <motion.div
-                initial="hidden" animate="visible" variants={revealText}
-                style={styles.heroCtaWrap}
-              >
-                <Link
-                  to="/register"
-                  onClick={triggerRegisterSlide}
-                  className="hero-register-btn"
-                  style={{
-                    position: 'relative',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: '#ffffff',
-                    padding: '1.25rem 4rem',
-                    borderRadius: '9999px',
-                    fontSize: '1.125rem',
-                    fontWeight: 800,
-                    color: '#000000',
-                    letterSpacing: '0.05em',
-                    textDecoration: 'none',
-                    boxShadow: '0 4px 14px 0 rgba(255, 255, 255, 0.39)',
-                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 255, 255, 0.6)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = '0 4px 14px 0 rgba(255, 255, 255, 0.39)';
-                  }}
-                >
-                  <span style={{ position: 'relative', zIndex: 10 }}>Register Now</span>
-                </Link>
-                <FlipClock />
-              </motion.div>
-            </div>
-          </section>
-        </motion.div>
+
+
+          </div>
+
+          {/* Scroll Cue */}
+          <AnimatePresence>
+              {(bootState === 'D' || bootState === 'E') && (
+                  <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5, duration: 1 }}
+                      style={{
+                          position: 'absolute',
+                          bottom: '2rem',
+                          color: 'var(--signature-gold)',
+                          animation: 'bounce 2s infinite'
+                      }}
+                  >
+                      <ChevronDown size={32} />
+                  </motion.div>
+              )}
+          </AnimatePresence>
+          
+          <style>{`
+              @keyframes bounce {
+                  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+                  40% { transform: translateY(-10px); }
+                  60% { transform: translateY(-5px); }
+              }
+          `}</style>
       </section>
 
       {/* ─── PANEL A (Foreground Layer) ─── */}
@@ -249,15 +241,9 @@ export default function Home() {
           position: 'relative',
           zIndex: 10,
           backgroundColor: 'var(--bg)',
-          borderTopLeftRadius: '32px',
-          borderTopRightRadius: '32px',
-          boxShadow: '0 -20px 40px rgba(0,0,0,0.5)',
           paddingTop: '2rem'
         }}
       >
-        <div style={{ width: '100%', overflow: 'hidden', padding: '2rem 0 5rem 0', display: 'flex', justifyContent: 'center' }}>
-          <SwitchEventCard />
-        </div>
 
         <div style={styles.contentWrap}>
           {/* ─── FEATURED TICKETS ─── */}
@@ -425,7 +411,7 @@ export default function Home() {
               {/* Social Icons */}
               <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.1em' }}>
                 {topSpeakers[0]?.socials?.linkedin && (
-                  <a href={topSpeakers[0].socials.linkedin} target="_blank" rel="noreferrer" style={iconBtnStyle}>
+                  <a href={topSpeakers[0].socials.linkedin} target="_blank" rel="noreferrer" className="social-icon" style={iconBtnStyle}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
                       <rect width="4" height="12" x="2" y="9" /><circle cx="4" cy="4" r="2" />
@@ -433,21 +419,21 @@ export default function Home() {
                   </a>
                 )}
                 {topSpeakers[0]?.socials?.twitter && (
-                  <a href={topSpeakers[0].socials.twitter} target="_blank" rel="noreferrer" style={iconBtnStyle}>
+                  <a href={topSpeakers[0].socials.twitter} target="_blank" rel="noreferrer" className="social-icon" style={iconBtnStyle}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
                     </svg>
                   </a>
                 )}
                 {topSpeakers[0]?.socials?.github && (
-                  <a href={topSpeakers[0].socials.github} target="_blank" rel="noreferrer" style={iconBtnStyle}>
+                  <a href={topSpeakers[0].socials.github} target="_blank" rel="noreferrer" className="social-icon" style={iconBtnStyle}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
                     </svg>
                   </a>
                 )}
                 {topSpeakers[0]?.socials?.instagram && (
-                  <a href={topSpeakers[0].socials.instagram} target="_blank" rel="noreferrer" style={iconBtnStyle}>
+                  <a href={topSpeakers[0].socials.instagram} target="_blank" rel="noreferrer" className="social-icon" style={iconBtnStyle}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                       <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
@@ -541,7 +527,7 @@ export default function Home() {
           </section>
 
           {/* ─── FAQ ─── */}
-          <section style={{ marginBottom: '5rem' }}>
+          <section id="faqs" style={{ marginBottom: '5rem' }}>
             <RevealText>
               <h2 className="section-title">FAQ</h2>
             </RevealText>

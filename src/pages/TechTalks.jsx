@@ -64,7 +64,7 @@ const styles = {
     marginBottom: 0,
   },
   gradient: {
-    background: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+    background: 'linear-gradient(135deg, var(--garnet), #B83A4A)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',

@@ -8,15 +8,15 @@
 
 :root {
   /* Colors */
-  --bg:              oklch(0.14 0.018 285);
-  --bg-secondary:    oklch(0.18 0.02 285);
-  --bg-tertiary:     oklch(0.22 0.025 285);
-  --border:          oklch(0.28 0.03 285);
-  --border-subtle:   oklch(0.22 0.025 285);
+  --bg:              #0A0908;
+  --bg-secondary:    #16130E;
+  --bg-tertiary:     #1c1812;
+  --border:          #332c21;
+  --border-subtle:   #262118;
 
-  --text:            oklch(0.96 0.008 285);
-  --text-muted:      oklch(0.60 0.03 285);
-  --text-dim:        oklch(0.45 0.025 285);
+  --text:            #EDE6D6;
+  --text-muted:      #9A9488;
+  --text-dim:        #7a756b;
 
   --cyan:            #22d3ee;
   --cyan-dim:        rgba(34, 211, 238, 0.15);
@@ -26,9 +26,16 @@
   --magenta-dim:     rgba(217, 70, 239, 0.15);
   --emerald:         #10b981;
   --amber:           #f59e0b;
-  --gold:            #d4a017;
-  --gold-bright:     #fbbf24;
+  --gold:            #D4AF37;
+  --gold-bright:     #F0DFA8;
   --orange:          #f97316;
+
+  /* Reskin Tokens */
+  --signature-gold:  #D4AF37;
+  --gold-light:      #F0DFA8;
+  --copper:          #C97A3D;
+  --garnet:          #8C2F39;
+  --brass:           #8A7A4E;
 
   /* Gradients */
   --gradient-brand:  linear-gradient(135deg, #8b5cf6, #d946ef);
@@ -37,18 +44,18 @@
   --gradient-hero:   linear-gradient(135deg, #8b5cf6 0%, #d946ef 50%, #22d3ee 100%);
 
   /* Ticket category themes */
-  --hackathon-base:   #F97316;
-  --hackathon-accent: #EF4444;
-  --hackathon-ink:    #1c0a00;
-  --techtalk-base:    #8B5CF6;
-  --techtalk-accent:  #C084FC;
-  --techtalk-ink:     #1a0a2e;
-  --workshop-base:    #14B8A6;
-  --workshop-accent:  #FACC15;
-  --workshop-ink:     #001a18;
+  --hackathon-base:   #C97A3D;
+  --hackathon-accent: #a86430;
+  --hackathon-ink:    #16130E;
+  --techtalk-base:    #8C2F39;
+  --techtalk-accent:  #6b222a;
+  --techtalk-ink:     #16130E;
+  --workshop-base:    #8A7A4E;
+  --workshop-accent:  #6d603b;
+  --workshop-ink:     #16130E;
   --competition-base: #EC4899;
   --competition-accent: #3B82F6;
-  --competition-ink:  #1a0022;
+  --competition-ink:  #16130E;
 
   /* Typography */
   --font-body:       'Inter', system-ui, sans-serif;
@@ -71,6 +78,18 @@
   --shadow-lg:       0 12px 48px rgba(0,0,0,0.5);
   --shadow-glow-cyan:    0 0 32px rgba(34,211,238,0.25);
   --shadow-glow-violet:  0 0 32px rgba(139,92,246,0.3);
+
+  --social-icon-hover-bg: var(--signature-gold);
+  --social-icon-hover-text: var(--bg);
+}
+
+.social-icon {
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.social-icon:hover {
+  background: var(--social-icon-hover-bg) !important;
+  color: var(--social-icon-hover-text) !important;
+  border-color: var(--social-icon-hover-bg) !important;
 }
 
 /* --- Reset & Base --- */

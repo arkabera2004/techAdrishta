@@ -116,21 +116,21 @@ export default function Team() {
 }
 
 const styles = {
-  page: { paddingTop: '96px', minHeight: '100svh', background: '#0a0a0f' },
+  page: { paddingTop: '96px', minHeight: '100svh', background: 'var(--bg)' },
   container: {
     maxWidth: '72rem',
     margin: '0 auto',
-    padding: '4rem 1.25rem 8rem',
+    padding: '4rem 1.25rem 18rem',
   },
   title: {
-    fontFamily: "'Space Grotesk', sans-serif",
+    fontFamily: "var(--font-heading)",
     fontWeight: 800,
     fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
-    color: '#fff',
+    color: 'var(--signature-gold)',
     marginBottom: '1rem',
   },
   sub: {
-    color: 'rgba(255,255,255,0.6)',
+    color: 'var(--text-muted)',
     fontSize: '1.125rem',
   },
   grid: {
@@ -146,16 +146,18 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '2rem',
-    background: '#13131a',
+    background: 'var(--bg-secondary)',
+    border: '1px solid var(--border)',
+    borderTop: '3px solid var(--brass)', // Brass accent
   },
   memberName: {
-    color: '#fff',
+    color: 'var(--text)',
     fontSize: '1.25rem',
     fontWeight: 700,
     marginBottom: '0.25rem',
   },
   memberRole: {
-    color: 'rgba(255,255,255,0.5)',
+    color: 'var(--brass)',
     fontSize: '0.875rem',
     marginBottom: '1.5rem',
   },

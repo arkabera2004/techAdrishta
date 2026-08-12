@@ -371,7 +371,7 @@ export default function RetroTV({ videos = [], initialIndex = 0 }) {
                   <line key={i}
                     x1={DIAL_CX + r1 * Math.cos(rad)} y1={DIAL_CY + r1 * Math.sin(rad)}
                     x2={DIAL_CX + r2 * Math.cos(rad)} y2={DIAL_CY + r2 * Math.sin(rad)}
-                    stroke={i === selected ? "#ffcf4d" : "#707068"}
+                    stroke={i === selected ? "#d4af37" : "#707068"}
                     strokeWidth={i === selected ? 2.5 : 1.5} />
                 );
               })}
@@ -390,10 +390,10 @@ export default function RetroTV({ videos = [], initialIndex = 0 }) {
                     stroke="rgba(0,0,0,0.35)" strokeWidth="2.5" />;
                 })}
                 {/* Pointer */}
-                <line x1="0" y1="7" x2="0" y2={-(DIAL_R - 11)} stroke="#ffcf4d" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="0" y1="7" x2="0" y2={-(DIAL_R - 11)} stroke="#d4af37" strokeWidth="2.5" strokeLinecap="round" />
                 {/* Center cap */}
                 <circle r="9" fill="#222224" stroke="#505050" strokeWidth="1" />
-                <circle r="3.5" fill="#ffcf4d" />
+                <circle r="3.5" fill="#d4af37" />
                 {/* Specular highlight */}
                 <circle cx="-15" cy="-14" r="11" fill="url(#gKnobSpec)" />
               </g>
@@ -479,18 +479,18 @@ export default function RetroTV({ videos = [], initialIndex = 0 }) {
               style={{
                 padding: "0.7cqi 1.2cqi",
                 cursor: "pointer",
-                borderBottom: "1px solid rgba(0,120,50,0.08)",
-                color: i === selected ? "#ffcf4d" : "#2ecc71",
-                background: i === selected ? "rgba(255,207,77,0.07)" : "transparent",
+                borderBottom: "1px solid rgba(212,175,55,0.08)",
+                color: i === selected ? "#d4af37" : "#9A9488",
+                background: i === selected ? "rgba(212,175,55,0.15)" : "transparent",
                 display: "flex", alignItems: "center", gap: "0.8cqi",
                 fontSize: "1.3cqi",
               }}
             >
-              <span style={{ color: i === selected ? "#ff7040" : "#2a4a30", minWidth: "1.4cqi", fontSize: "1.0cqi" }}>
+              <span style={{ color: i === selected ? "#F0DFA8" : "#9A9488", minWidth: "1.4cqi", fontSize: "1.0cqi" }}>
                 {i === selected ? "▶" : "·"}
               </span>
-              <span style={{ color: i === selected ? "#ffcf4d" : "#608050", minWidth: "2.0cqi" }}>{i + 1}</span>
-              <span style={{ color: "#304428", fontSize: "1.1cqi" }}>│</span>
+              <span style={{ color: i === selected ? "#d4af37" : "#9A9488", minWidth: "2.0cqi" }}>{i + 1}</span>
+              <span style={{ color: "rgba(212,175,55,0.3)", fontSize: "1.1cqi" }}>│</span>
               <span>{v.name}</span>
             </div>
           ))}

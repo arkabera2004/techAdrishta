@@ -57,7 +57,7 @@ function TimelineNode({ event, index }) {
             <span className="timeline-category-tag" style={{ color: color }}>
               {event.category}
             </span>
-            <span className="timeline-time" style={{ color: color }}>{event.time}</span>
+            <span className="timeline-time" style={{ color: color, fontFamily: 'var(--font-mono)' }}>{event.time}</span>
             <h3 className="timeline-title">{event.title}</h3>
             <span className="timeline-venue">{event.venue}</span>
           </div>

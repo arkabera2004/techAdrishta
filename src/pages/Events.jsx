@@ -1,25 +1,45 @@
 // src/pages/Events.jsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import TicketCard from '../components/TicketCard';
 import { events } from '../data/events';
+import { fetchEvents } from '../lib/supabase';
 
 const CATEGORIES = ['All', 'Hackathon', 'TED Talk', 'Workshop', 'Competition'];
 const CAT_KEY = { 'Hackathon': 'hackathon', 'TED Talk': 'tedtalk', 'Workshop': 'workshop', 'Competition': 'competition' };
 
-const getTilt = (id) => {
-  const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  // Returns a pseudo-random rotation between -2 and +2 degrees
-  return (hash % 5) - 2;
-};
+
 
 export default function Events() {
   const [filter, setFilter] = useState('All');
   const [query,  setQuery]  = useState('');
+  const [eventsList, setEventsList] = useState(events);
+
+  useEffect(() => {
+    fetchEvents().then(data => {
+      if (data && data.length > 0) {
+        setEventsList(events.map(staticEv => {
+          const dbMatch = data.find(d => d.id === staticEv.id);
+          if (dbMatch) {
+            return {
+              ...staticEv,
+              id: dbMatch.id, // Use UUID for correct routing
+              title: dbMatch.name, // Update title dynamically
+              price: dbMatch.price,
+              seatsLeft: dbMatch.seats_left,
+              seatLimit: dbMatch.seat_limit,
+              type: dbMatch.type
+            };
+          }
+          return staticEv;
+        }));
+      }
+    }).catch(err => console.error("Failed to fetch events", err));
+  }, []);
 
   const filtered = useMemo(() => {
-    let list = events;
+    let list = eventsList;
     if (filter !== 'All') {
       list = list.filter(e => e.category === CAT_KEY[filter]);
     }
@@ -32,7 +52,7 @@ export default function Events() {
       );
     }
     return list;
-  }, [filter, query]);
+  }, [filter, query, eventsList]);
 
   return (
     <main style={styles.page}>
@@ -93,7 +113,7 @@ export default function Events() {
         {filtered.length > 0 ? (
           <div style={styles.wall}>
             {filtered.map((ev, i) => {
-              const tilt = getTilt(ev.id);
+              const tilt = ev.tilt ?? 0;
               return (
                 <motion.div
                   key={ev.id}

@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { ChevronDown, ArrowRight } from 'lucide-react';
@@ -12,6 +12,7 @@ import MusicPlayer from '../components/MusicPlayer.jsx'
 
 
 import { events, FEST } from '../data/events';
+import { fetchEvents } from '../lib/supabase';
 import { speakers } from '../data/speakers';
 import { schedule, scheduleColors } from '../data/schedule';
 import { RevealText, RevealBreath, StaggerGroup, StaggerItem } from '../components/animations/Reveal';
@@ -73,7 +74,10 @@ function StickyTicket({ event, index, baseTilt }) {
         zIndex: index + 10,
       }}
     >
-      <motion.div style={{ rotate, transformOrigin: 'center center' }}>
+      <motion.div 
+        style={{ rotate, transformOrigin: 'center center' }}
+        whileHover={{ rotate: 0 }}
+      >
         <TicketCard event={event} tilt={0} />
       </motion.div>
     </div>
@@ -103,7 +107,31 @@ export default function Home() {
   const speakerOpacity = useTransform(panelBProgress, [0, 1], [1, 0.75]);
   const speakerY = useTransform(panelBProgress, [0, 1], ["0px", "-20px"]);
 
-  const featuredEvents = events.slice(0, 3);
+  const [eventsList, setEventsList] = useState(events);
+
+  useEffect(() => {
+    fetchEvents().then(data => {
+      if (data && data.length > 0) {
+        setEventsList(events.map(staticEv => {
+          const dbMatch = data.find(d => d.id === staticEv.id);
+          if (dbMatch) {
+            return {
+              ...staticEv,
+              id: dbMatch.id, // Use UUID for correct routing
+              title: dbMatch.name, // Update title dynamically
+              price: dbMatch.price,
+              seatsLeft: dbMatch.seats_left,
+              seatLimit: dbMatch.seat_limit,
+              type: dbMatch.type
+            };
+          }
+          return staticEv;
+        }));
+      }
+    }).catch(err => console.error("Failed to fetch events", err));
+  }, []);
+
+  const featuredEvents = eventsList.slice(0, 3);
   const topSpeakers = speakers.slice(0, 4);
 
   function triggerRegisterSlide() {
@@ -239,7 +267,7 @@ export default function Home() {
           <div style={{ paddingBottom: '2.5rem', paddingTop: '2rem' }}>
             <div style={{ display: 'flex', width: '100%', flexDirection: 'column', gap: '5rem' }}>
               {featuredEvents.map((ev, i) => (
-                <StickyTicket key={ev.id} event={ev} index={i} baseTilt={[-1.5, 1, -1][i] ?? 0} />
+                <StickyTicket key={ev.id} event={ev} index={i} baseTilt={ev.tilt ?? 0} />
               ))}
             </div>
           </div>

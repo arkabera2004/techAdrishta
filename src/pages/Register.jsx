@@ -3,14 +3,15 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Copy, CheckCircle, ChevronDown } from 'lucide-react';
-import { events } from '../data/events';
-import upiQr from '../assets/upi-qr.jpg';
+import { events as staticEvents } from '../data/events';
+import { QRCodeSVG } from 'qrcode.react';
+import { fetchEvents, registerForEvent } from '../lib/supabase';
 
 /* ─── Constants (mirrors FEST / register.tsx) ─── */
-const UPI_ID            = 'techadrishta@upi';
-const SMIT_DOMAIN       = '@smit.smu.edu.in';
-const STEPS             = ['Your details', 'Pay via UPI', 'Transaction ID', 'Confirmed'];
-const SMIT_STEPS        = ['Your details', 'SMIT waiver', 'Confirmed'];
+const UPI_ID = 'thakurayush670@oksbi';
+const SMIT_DOMAIN = '@smit.smu.edu.in';
+const STEPS = ['Your details', 'Pay via UPI', 'Transaction ID', 'Confirmed'];
+const SMIT_STEPS = ['Your details', 'SMIT waiver', 'Confirmed'];
 
 /* ─── Helpers ─── */
 function formatPrice(price) {
@@ -21,18 +22,22 @@ function genRegId() {
 }
 
 /* ─── Validation (mirrors zod schemas) ─── */
-function validateDetails(form) {
+function validateDetails(form, isTeamEvent) {
   const errs = {};
   if (!form.full_name.trim() || form.full_name.trim().length < 2)
     errs.full_name = 'Enter your full name';
   if (!form.email.trim().includes('@'))
     errs.email = 'Enter a valid email';
-  else if (form.is_smit_student && !form.email.toLowerCase().endsWith(SMIT_DOMAIN))
-    errs.email = `Use your SMIT email ending in ${SMIT_DOMAIN}`;
-  if (form.phone.trim().length < 8)
+  if (form.is_smit_student && !form.registration_no?.trim())
+    errs.registration_no = 'Enter your registration number';
+  if (!form.phone.trim() || form.phone.trim().length < 8)
     errs.phone = 'Enter a valid phone number';
+  if (!form.college_or_company?.trim())
+    errs.college_or_company = 'Enter your college name';
   if (!form.event_id)
     errs.event_id = 'Pick an event';
+  if (isTeamEvent && !form.team_name?.trim())
+    errs.team_name = 'Enter your team name';
   return errs;
 }
 function validateUtr(utr) {
@@ -43,32 +48,58 @@ function validateUtr(utr) {
 
 /* ─── Page ─── */
 export default function Register() {
-  const [searchParams]    = useSearchParams();
-  const preselectedId     = searchParams.get('event') ?? '';
+  const [searchParams] = useSearchParams();
+  const preselectedId = searchParams.get('event') ?? '';
 
-  const [step,       setStep]       = useState(0);
-  const [errors,     setErrors]     = useState({});
+  const [step, setStep] = useState(0);
+  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [regId,      setRegId]      = useState(null);
-  const [slideIn,    setSlideIn]    = useState(false);
-  const [toastMsg,   setToastMsg]   = useState(null);  // { text, ok }
-  const [copied,     setCopied]     = useState(false);
+  const [regId, setRegId] = useState(null);
+  const [slideIn, setSlideIn] = useState(false);
+  const [toastMsg, setToastMsg] = useState(null);  // { text, ok }
+  const [copied, setCopied] = useState(false);
+  const [events, setEvents] = useState(staticEvents);
 
   const [form, setForm] = useState({
-    full_name:          '',
-    email:              '',
-    phone:              '',
+    full_name: '',
+    email: '',
+    registration_no: '',
+    phone: '',
     college_or_company: '',
-    event_id:           preselectedId,
-    utr_number:         '',
-    is_smit_student:    false,
+    team_name: '',
+    team_members: [
+      { name: '', email: '', phone: '' },
+      { name: '', email: '', phone: '' },
+      { name: '', email: '', phone: '' },
+      { name: '', email: '', phone: '' },
+    ],
+    event_id: preselectedId,
+    utr_number: '',
+    is_smit_student: false,
   });
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const selected    = events.find(e => e.id === form.event_id);
-  const amount      = Number(selected?.price ?? 0);
-  const amountDue   = form.is_smit_student ? 0 : amount;
-  const steps       = form.is_smit_student ? SMIT_STEPS : STEPS;
+  
+  // Sync URL parameter if it changes
+  useEffect(() => {
+    if (preselectedId) {
+      setForm(f => ({ ...f, event_id: preselectedId }));
+    }
+  }, [preselectedId]);
+
+  const selected = events.find(e => String(e.id) === String(form.event_id));
+  const isTeamEvent = selected?.type === 'team' || selected?.is_team || String(selected?.title || selected?.name).toLowerCase().includes('hackathon') || String(selected?.title || selected?.name).toLowerCase().includes('flag') || false;
+
+  useEffect(() => {
+    fetchEvents().then(data => {
+      if (data && data.length > 0) {
+        setEvents(data.map(d => ({ ...d, title: d.name || d.title })));
+      }
+    }).catch(err => console.error("Failed to fetch events", err));
+  }, []);
+  const amount = Number(selected?.price ?? 0);
+  const amountDue = form.is_smit_student ? 0 : amount;
+  const steps = form.is_smit_student ? SMIT_STEPS : STEPS;
   const displayedStep = form.is_smit_student && step === 3 ? 2 : step;
 
   /* Slide-down animation when arriving from a ticket tear */
@@ -87,31 +118,52 @@ export default function Register() {
     return () => clearTimeout(t);
   }, [toastMsg]);
 
-  /* Simulate DB insert (replace with real API call) */
-  async function createRegistration({ status, utrNumber }) {
-    await new Promise(r => setTimeout(r, 650));   // simulate network
-    const id = genRegId();
-    setRegId(id);
-    setStep(3);
-    return id;
+  async function submitRegistration(formState) {
+    setSubmitting(true);
+    setErrors({});
+    try {
+      const validMembers = isTeamEvent
+        ? formState.team_members.filter(m => m.name.trim() || m.email.trim() || m.phone.trim())
+        : [];
+      const newId = await registerForEvent({
+        fullName: formState.full_name,
+        email: formState.email,
+        phone: formState.phone,
+        college: formState.college_or_company,
+        teamName: isTeamEvent ? formState.team_name : null,
+        teamMembers: validMembers,
+        eventId: formState.event_id,
+        utrId: formState.utr_number || "SMIT_FREE",
+        collegeRegNo: formState.registration_no || null,
+      });
+      setRegId(newId || genRegId());
+      setStep(3);
+      setToastMsg({ text: 'Registration confirmed ✓', ok: true });
+    } catch (err) {
+      if (err.message && err.message.includes("fully booked")) {
+        setToastMsg({ text: "Sorry, this track just sold out. Please pick another.", ok: false });
+        fetchEvents().then(data => {
+          if (data && data.length > 0) setEvents(data.map(d => ({ ...d, title: d.name || d.title })));
+        }).catch(e => console.error(e));
+      } else if (err.message && err.message.includes("duplicate key")) {
+        setToastMsg({ text: "This transaction ID has already been used.", ok: false });
+      } else {
+        console.error(err);
+        setToastMsg({ text: "Something went wrong. Please try again.", ok: false });
+      }
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   /* Step 0 → continue */
   async function nextFromDetails() {
-    const errs = validateDetails(form);
+    const errs = validateDetails(form, isTeamEvent);
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({});
 
     if (form.is_smit_student) {
-      setSubmitting(true);
-      try {
-        await createRegistration({ status: 'smit_free' });
-        setToastMsg({ text: 'SMIT student pass confirmed ✓', ok: true });
-      } catch {
-        setToastMsg({ text: 'Something went wrong', ok: false });
-      } finally {
-        setSubmitting(false);
-      }
+      await submitRegistration(form);
       return;
     }
     setStep(1);
@@ -122,15 +174,7 @@ export default function Register() {
     const err = validateUtr(form.utr_number);
     if (err) { setErrors({ utr_number: err }); return; }
     setErrors({});
-    setSubmitting(true);
-    try {
-      await createRegistration({ status: 'pending', utrNumber: form.utr_number.trim() });
-      setToastMsg({ text: 'Registration submitted — pending verification', ok: true });
-    } catch {
-      setToastMsg({ text: 'Something went wrong', ok: false });
-    } finally {
-      setSubmitting(false);
-    }
+    await submitRegistration(form);
   }
 
   function copyUpi() {
@@ -197,51 +241,116 @@ export default function Register() {
             {/* ── Step 0: Your details ── */}
             {step === 0 && (
               <motion.div key="details" {...fade} style={styles.stepBody}>
-                <Field id="full_name" label="Full name" error={errors.full_name}>
+                <Field id="full_name" label="Full name" error={errors.full_name} required>
                   <input id="full_name" type="text" placeholder="Arjun Sharma"
                     value={form.full_name}
                     onChange={e => set('full_name', e.target.value)}
                     style={input(!!errors.full_name)} />
                 </Field>
 
-                <Field id="email" label="Email" error={errors.email}>
-                  <input id="email" type="email" placeholder="you@smit.smu.edu.in"
+                <Field id="email" label="Email" error={errors.email} required>
+                  <input id="email" type="email" placeholder="you@example.com"
                     value={form.email}
                     onChange={e => set('email', e.target.value)}
                     style={input(!!errors.email)} />
-                  <p style={styles.hint}>SMIT students must register with their official {SMIT_DOMAIN} email.</p>
                 </Field>
 
-                <Field id="phone" label="Phone" error={errors.phone}>
+                {form.is_smit_student && (
+                  <Field id="registration_no" label="Registration No." error={errors.registration_no} required>
+                    <input id="registration_no" type="text" placeholder="e.g. 20230001"
+                      value={form.registration_no}
+                      onChange={e => set('registration_no', e.target.value)}
+                      style={input(!!errors.registration_no)} />
+                  </Field>
+                )}
+
+                <Field id="phone" label="Phone" error={errors.phone} required>
                   <input id="phone" type="tel" placeholder="+91 98765 43210"
                     value={form.phone}
                     onChange={e => set('phone', e.target.value)}
                     style={input(!!errors.phone)} />
                 </Field>
 
-                <Field id="org" label="College or company">
+                <Field id="org" label="College or company" error={errors.college_or_company} required>
                   <input id="org" type="text" placeholder="IIT Bangalore / SMIT"
                     value={form.college_or_company}
                     onChange={e => set('college_or_company', e.target.value)}
-                    style={input(false)} />
+                    style={input(!!errors.college_or_company)} />
                 </Field>
 
-                <Field id="event_id" label="Event" error={errors.event_id}>
+                <Field id="event_id" label="Event" error={errors.event_id} required>
                   <div style={{ position: 'relative' }}>
                     <select id="event_id"
                       value={form.event_id}
                       onChange={e => set('event_id', e.target.value)}
                       style={{ ...input(!!errors.event_id), cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
                       <option value="" style={{ background: '#09090f', color: '#fff' }}>Select an event…</option>
-                      {events.map(ev => (
-                        <option key={ev.id} value={ev.id} style={{ background: '#09090f', color: '#fff' }}>
-                          {ev.title} — {form.is_smit_student ? 'Free for SMIT students' : formatPrice(Number(ev.price))}
-                        </option>
-                      ))}
+                      {events.map(ev => {
+                        const isSoldOut = ev.seats_left <= 0;
+                        return (
+                          <option key={ev.id} value={ev.id} disabled={isSoldOut} style={{ background: '#09090f', color: isSoldOut ? '#ef4444' : '#fff' }}>
+                            {ev.title || ev.name} {isSoldOut ? '— Sold Out' : `— ${form.is_smit_student ? 'Free for SMIT students' : formatPrice(Number(ev.price))}`}
+                          </option>
+                        );
+                      })}
                     </select>
                     <ChevronDown size={18} color="#94a3b8" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   </div>
                 </Field>
+
+                {isTeamEvent && (
+                  <>
+                    <Field id="team_name" label="Team Name" error={errors.team_name} required>
+                      <input id="team_name" type="text" placeholder="e.g. The Innovators"
+                        value={form.team_name}
+                        onChange={e => set('team_name', e.target.value)}
+                        style={input(!!errors.team_name)} />
+                    </Field>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
+                      <p style={{ ...styles.fieldLabel, marginBottom: '0.25rem' }}>Other Team Members (Optional)</p>
+                      <p style={styles.hint}>You are the Team Leader. You can add up to 4 more members below.</p>
+                      {form.team_members.map((member, idx) => (
+                        <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', width: '100%' }}>Member {idx + 2}</span>
+                          <input
+                            type="text"
+                            placeholder="Name"
+                            value={member.name}
+                            onChange={e => {
+                              const newMembers = [...form.team_members];
+                              newMembers[idx].name = e.target.value;
+                              set('team_members', newMembers);
+                            }}
+                            style={{ ...input(false), flex: '1 1 120px' }}
+                          />
+                          <input
+                            type="email"
+                            placeholder="Email"
+                            value={member.email}
+                            onChange={e => {
+                              const newMembers = [...form.team_members];
+                              newMembers[idx].email = e.target.value;
+                              set('team_members', newMembers);
+                            }}
+                            style={{ ...input(false), flex: '1 1 120px' }}
+                          />
+                          <input
+                            type="tel"
+                            placeholder="Phone"
+                            value={member.phone}
+                            onChange={e => {
+                              const newMembers = [...form.team_members];
+                              newMembers[idx].phone = e.target.value;
+                              set('team_members', newMembers);
+                            }}
+                            style={{ ...input(false), flex: '1 1 100px' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
 
                 {/* SMIT checkbox */}
                 <label style={styles.smitLabel} htmlFor="is_smit">
@@ -251,21 +360,10 @@ export default function Register() {
                     style={styles.checkbox}
                   />
                   <span>
-                    <span style={styles.smitBold}>I am a SMIT student</span>
-                    <span style={styles.smitSub}>
-                      Free registration for Sikkim Manipal Institute of Technology students
-                      using an official {SMIT_DOMAIN} email ID.
-                    </span>
+                    <span style={{ ...styles.smitBold, marginBottom: 0 }}>I am a SMIT student</span>
                   </span>
                 </label>
 
-                {/* SMIT waiver notice */}
-                {form.is_smit_student && selected && (
-                  <div style={styles.waiverBanner}>
-                    <strong style={{ color: '#fff' }}>{selected.title}</strong> is free for
-                    SMIT students. Payment and UTR steps will be skipped.
-                  </div>
-                )}
 
                 <button
                   type="button"
@@ -290,7 +388,12 @@ export default function Register() {
                 <p style={styles.amountValue}>{formatPrice(amountDue)}</p>
                 <p style={styles.eventName}>{selected?.title}</p>
                 <div style={styles.qrWrap}>
-                  <img src={upiQr} alt="UPI QR code for payment" style={styles.qrImg} />
+                  <QRCodeSVG
+                    value={`upi://pay?pa=${UPI_ID}&pn=TECH%20ADRISHTA&am=${amountDue}&cu=INR`}
+                    size={156}
+                    bgColor="#ffffff"
+                    fgColor="#000000"
+                  />
                 </div>
                 <p style={styles.upiLine}>
                   UPI ID: <strong style={{ color: '#fff' }}>{UPI_ID}</strong>
@@ -362,10 +465,13 @@ export default function Register() {
 }
 
 /* ─── Field wrapper ─── */
-function Field({ id, label, error, children }) {
+function Field({ id, label, error, required, children }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-      <label htmlFor={id} style={styles.fieldLabel}>{label}</label>
+      <label htmlFor={id} style={styles.fieldLabel}>
+        {label}
+        {required && <span style={{ color: '#ef4444', marginLeft: '4px', fontSize: '0.875rem' }}>*</span>}
+      </label>
       {children}
       {error && <span style={styles.fieldError}>{error}</span>}
     </div>
@@ -392,9 +498,9 @@ function input(hasError) {
 }
 
 const fade = {
-  initial:    { opacity: 0, y: 10 },
-  animate:    { opacity: 1, y: 0 },
-  exit:       { opacity: 0, y: -10 },
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
   transition: { duration: 0.22 },
 };
 

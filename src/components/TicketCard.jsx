@@ -112,9 +112,14 @@ function Confetti({ color }) {
 
 /* ─── Main TicketCard ─── */
 export default function TicketCard({ event, tilt = 0 }) {
-  const theme = getCategoryTheme(event.category);
   const navigate = useNavigate();
   const reduced = useReducedMotion();
+
+  const isSoldOut = typeof event.seatsLeft === 'number' && event.seatsLeft <= 0;
+  const originalTheme = getCategoryTheme(event.category);
+  const theme = isSoldOut
+    ? { base: '#1a1a24', ink: '#4b4b5c', accent: '#222230', label: 'CLOSED', pattern: originalTheme.pattern }
+    : originalTheme;
 
   const [isTearing, setIsTearing] = useState(false);
   const cardRef = useRef(null);
@@ -125,6 +130,7 @@ export default function TicketCard({ event, tilt = 0 }) {
   }, [event.id, navigate]);
 
   function handleRegister() {
+    if (isSoldOut) return;
     playTearSound();
     if (reduced) { go(); return; }
     if (!cardRef.current || isTearing) return;
@@ -343,6 +349,31 @@ export default function TicketCard({ event, tilt = 0 }) {
           borderLeft: `2px dashed ${theme.ink}`, opacity: 0.5,
         }} />
 
+        {/* CLOSED Tag */}
+        {isSoldOut && (
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) rotate(-15deg)',
+            background: 'rgba(239, 68, 68, 0.05)',
+            border: '4px solid #ef4444',
+            color: '#ef4444',
+            padding: '0.5rem 1.5rem',
+            borderRadius: '8px',
+            fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
+            fontWeight: 900,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            zIndex: 10,
+            backdropFilter: 'blur(2px)',
+            boxShadow: '0 8px 32px rgba(239, 68, 68, 0.15)',
+            pointerEvents: 'none'
+          }}>
+            CLOSED
+          </div>
+        )}
+
         {/* ── Right stub ── */}
         <div style={{
           position: 'relative', flex: 1, overflow: 'hidden',
@@ -376,19 +407,21 @@ export default function TicketCard({ event, tilt = 0 }) {
           <motion.button
             type="button"
             onClick={handleRegister}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            disabled={isSoldOut}
+            whileHover={isSoldOut ? {} : { scale: 1.03 }}
+            whileTap={isSoldOut ? {} : { scale: 0.97 }}
             style={{
               width: '100%', padding: '10px 0',
-              borderRadius: '12px', border: 'none', cursor: 'pointer',
+              borderRadius: '12px', border: 'none', cursor: isSoldOut ? 'not-allowed' : 'pointer',
               fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '0.6875rem', fontWeight: 900,
               letterSpacing: '0.18em', textTransform: 'uppercase',
               background: theme.ink, color: theme.accent,
+              opacity: isSoldOut ? 0.6 : 1,
             }}
             id={`register-btn-${event.id}`}
           >
-            Register Now
+            {isSoldOut ? 'SOLD OUT' : 'Register Now'}
           </motion.button>
 
           {/* Confetti fires when tearing starts */}

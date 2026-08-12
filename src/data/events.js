@@ -10,7 +10,8 @@ export const FEST = {
 
 export const events = [
   {
-    id: 'hackathon-neon',
+    id: '81e8ff97-0c5f-4a16-a1b0-9abff4792eff',
+    tilt: 0,
     title: 'Neon Nights Hackathon',
     description: '36 hours. One product. Ship something that shouldn\'t exist yet.',
     category: 'hackathon',
@@ -35,7 +36,8 @@ export const events = [
     speaker: null,
   },
   {
-    id: 'techtalk-llm',
+    id: '663b1a58-3d09-49c4-bd9a-8ca68c96b4ca',
+    tilt: 1,
     title: 'Scaling LLMs Without Losing Your Mind',
     description: 'A field report on running inference at 40M requests a day.',
     category: 'tedtalk',
@@ -58,7 +60,8 @@ export const events = [
     },
   },
   {
-    id: 'workshop-web3',
+    id: '5ce9acfe-bd69-41ac-9277-384d83598150',
+    tilt: 0,
     title: 'Web3 in Practice: Build a Wallet',
     description: 'Hands-on session — bring a laptop and leave with a working wallet.',
     category: 'workshop',
@@ -76,7 +79,8 @@ export const events = [
     speaker: null,
   },
   {
-    id: 'techtalk-sustainability',
+    id: '5e0c4122-706e-435f-8121-00483e108ed4',
+    tilt: 1,
     title: 'Sustainable Tech: Building for the Planet',
     description: 'How to engineer for impact — green architecture from first principles.',
     category: 'tedtalk',
@@ -99,7 +103,8 @@ export const events = [
     },
   },
   {
-    id: 'competition-ctf',
+    id: '81aae20f-dc15-4e6f-9a3b-68322645052c',
+    tilt: 0,
     title: 'Capture The Flag: Red Zone',
     description: 'Security CTF. Break things legally. Prizes for the top 3 teams.',
     category: 'competition',
@@ -122,7 +127,8 @@ export const events = [
     speaker: null,
   },
   {
-    id: 'workshop-robotics',
+    id: 'c8c52879-0cd5-47a1-912e-af946647d83e',
+    tilt: 0,
     title: 'Robotics Rapid Prototype Sprint',
     description: 'Build a functional robot arm using ROS2 in 3 hours. Kits provided.',
     category: 'workshop',
@@ -140,7 +146,8 @@ export const events = [
     speaker: null,
   },
   {
-    id: 'techtalk-ai',
+    id: 'e033cb20-6961-4fcb-a944-0db610d93ec4',
+    tilt: -2,
     title: 'AI at the Edge: From Cloud to Device',
     description: 'Deploying models on constrained hardware — lessons from production.',
     category: 'tedtalk',
@@ -163,7 +170,8 @@ export const events = [
     },
   },
   {
-    id: 'competition-pitch',
+    id: '03b29930-878a-4ae1-808b-330587717f02',
+    tilt: -1,
     title: 'Startup Pitch Arena',
     description: '3 minutes, one idea, a room full of investors. Make it count.',
     category: 'competition',

@@ -101,6 +101,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
 
     const [bootState, setBootState] = useState('A');
     const [blackFade, setBlackFade] = useState(false);
+    const [nintendoIndex, setNintendoIndex] = useState(0);
 
     useEffect(() => {
         if (forceStateE) {
@@ -630,7 +631,8 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                         {(bootState === 'C' || bootState === 'D' || bootState === 'E' || isScrolling) && (
                             <div 
                                 ref={el => { if (el && navbarHeight === 0) setNavbarHeight(el.clientHeight); }}
-                                className="w-full flex justify-between items-center px-[4cqi] py-[1.5cqi] border-b border-[rgba(135,206,235,0.15)] animate-in fade-in slide-in-from-top-4 duration-700 relative z-20">
+                                className="w-full flex justify-between items-center px-[4cqi] py-[1.5cqi] border-b border-[rgba(135,206,235,0.15)] animate-in fade-in slide-in-from-top-4 duration-700 relative z-20"
+                                style={{ backgroundColor: isScrolling ? '#0B0F1C' : 'transparent' }}>
                                 {/* Spacer to keep nav centered */}
                                 <div style={{ width: '2.5cqi' }}></div>
                                 <div className="flex items-center gap-[3cqi]">
@@ -856,7 +858,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                             )}
                             
                             {/* Dynamic Children Content (Featured Tickets, Speakers, Schedule, etc.) */}
-                            {typeof children === 'function' ? children(scrollRef) : children}
+                            {typeof children === 'function' ? children({ scrollRef, isScrolling, bootState, nintendoIndex }) : children}
                         </motion.div>
                         </div>
                     </div>

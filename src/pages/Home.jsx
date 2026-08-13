@@ -55,7 +55,7 @@ const staggerContainer = {
 };
 
 /* ─── Helper Component for Sticky Tickets ─── */
-function StickyTicket({ event, index, baseTilt, scrollContainerRef }) {
+function StickyTicket({ event, index, baseTilt, scrollContainerRef, isScrolling, bootState, nintendoIndex }) {
   const ref = useRef(null);
 
   const { scrollYProgress } = useScroll({
@@ -66,18 +66,29 @@ function StickyTicket({ event, index, baseTilt, scrollContainerRef }) {
 
   const rotate = useTransform(scrollYProgress, [0, 1], [baseTilt, 0]);
 
+  const isNintendo = !isScrolling;
+  const isNintendoVisible = bootState === 'F' && nintendoIndex >= index;
   return (
     <div
       ref={ref}
       style={{
-        position: 'sticky',
-        top: `calc(160px + ${index * 24}px)`,
-        zIndex: index + 10,
+        position: isNintendo ? 'absolute' : 'sticky',
+        top: isNintendo ? `calc(160px + ${index * 24}px)` : `calc(160px + ${index * 24}px)`,
+        left: 0,
+        width: '100%',
+        zIndex: isNintendo ? (index + 50) : (index + 10),
+        pointerEvents: isNintendo ? (isNintendoVisible ? 'auto' : 'none') : 'auto',
       }}
     >
       <motion.div
-        style={{ rotate, transformOrigin: 'center center' }}
-        whileHover={{ rotate: 0 }}
+        initial={false}
+        animate={{ 
+          y: isNintendo ? (isNintendoVisible ? 0 : 500) : 0, 
+          opacity: isNintendo ? (isNintendoVisible ? 1 : 0) : 1 
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        style={isNintendo ? {} : { rotate, transformOrigin: 'center center' }}
+        whileHover={isNintendo ? {} : { rotate: 0 }}
       >
         <TicketCard event={event} tilt={0} />
       </motion.div>
@@ -249,7 +260,7 @@ export default function Home() {
                 contentY={contentY}
                 onContentHeightChange={setContentHeight}
               >
-                 {(scrollRef) => {
+                 {({ scrollRef, isScrolling, bootState, nintendoIndex }) => {
                      if (!innerScrollRef && scrollRef.current) {
                          setTimeout(() => setInnerScrollRef(scrollRef.current), 0);
                      }
@@ -259,18 +270,26 @@ export default function Home() {
       <section
         ref={panelARef}
         style={{
-          position: 'relative',
+          position: !isScrolling ? 'absolute' : 'relative',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: !isScrolling ? '100%' : 'auto',
           zIndex: 10,
-          backgroundColor: 'var(--bg)',
-          paddingTop: '2rem'
+          backgroundColor: !isScrolling ? 'transparent' : 'var(--bg)',
+          paddingTop: !isScrolling ? 0 : '2rem',
+          opacity: !isScrolling ? (bootState === 'F' ? 1 : 0) : 1,
+          pointerEvents: !isScrolling ? (bootState === 'F' ? 'auto' : 'none') : 'auto',
+          transition: 'opacity 0.5s ease',
         }}
       >
 
-        <div style={styles.contentWrap}>
+        <div style={!isScrolling ? { margin: 0, padding: 0 } : styles.contentWrap}>
           {/* ─── FEATURED TICKETS ─── */}
           <section>
             <div style={{
               ...styles.sectionHeader,
+              display: !isScrolling ? 'none' : 'flex',
               position: 'sticky',
               top: '-1px',
               zIndex: 5,
@@ -290,10 +309,10 @@ export default function Home() {
                 <Link to="/events" style={styles.seeAll}>See all events →</Link>
               </RevealBreath>
             </div>
-            <div style={{ paddingBottom: '2.5rem', paddingTop: '2rem' }}>
-              <div style={{ display: 'flex', width: '100%', flexDirection: 'column', gap: '5rem' }}>
+            <div style={{ paddingBottom: !isScrolling ? 0 : '2.5rem', paddingTop: !isScrolling ? 0 : '2rem' }}>
+              <div style={{ display: 'flex', width: '100%', flexDirection: 'column', gap: !isScrolling ? 0 : '5rem' }}>
                 {featuredEvents.map((ev, i) => (
-                  <StickyTicket key={ev.id} event={ev} index={i} baseTilt={ev.tilt ?? 0} scrollContainerRef={innerScrollRef} />
+                  <StickyTicket key={ev.id} event={ev} index={i} baseTilt={ev.tilt ?? 0} scrollContainerRef={innerScrollRef} isScrolling={isScrolling} bootState={bootState} nintendoIndex={nintendoIndex} />
                 ))}
               </div>
             </div>
@@ -301,333 +320,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── SPEAKERS (Sticky Layer) ─── */}
-      <section style={{ position: 'relative', minHeight: '100dvh', zIndex: 0, display: 'flex', flexDirection: 'column', backgroundColor: '#000' }}>
-        <motion.div style={{ scale: speakerScale, opacity: speakerOpacity, y: speakerY, flex: 1, display: 'flex', flexDirection: 'column', transformOrigin: 'center top' }}>
-          <section style={{
-            position: 'relative',
-            width: '100%',
-            flex: 1,
-            margin: 0,
-            padding: 0,
-            minHeight: '100dvh',
-            backgroundImage: "url('/speakerbackground.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'top center',
-            backgroundRepeat: 'no-repeat',
-            overflow: 'hidden',
-          }}>
-            {/* MusicPlayer — far left of stage */}
-            <div style={{
-              position: 'absolute',
-              left: '-1%',
-              top: '70%',
-              transform: 'translateY(-50%)',
-              width: '17%',
-              zIndex: 10,
-            }}>
-              <MusicPlayer />
-            </div>
-
-            {/* ─── "Featured Speaker" — pinned to top center ─── */}
-            <div style={{
-              position: 'absolute',
-              top: '20%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 10,
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
-            }}>
-              <p style={{
-                margin: 0,
-                fontSize: 'clamp(1.2rem, 1vw, 0.85rem)',
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 700,
-                letterSpacing: '0.3em',
-                textTransform: 'uppercase',
-                color: '#d4af37',
-              }}>
-                ✦ &nbsp; Featured Speaker &nbsp; ✦
-              </p>
-            </div>
-
-            {/* ─── Speaker details — true screen center ─── */}
-            <div style={{
-              position: 'absolute',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '36%',
-              zIndex: 10,
-              textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}>
-              {/* Speaker Name */}
-              <h2 style={{
-                margin: 0,
-                fontSize: 'clamp(1.8rem, 4vw, 2.9rem)',
-                fontWeight: 700,
-                lineHeight: 1.05,
-                fontFamily: "'Georgia', 'Times New Roman', serif",
-                color: '#ffffff',
-                letterSpacing: '-0.01em',
-              }}>
-                {topSpeakers[0]?.name}
-              </h2>
-
-              {/* Role · Company */}
-              <p style={{
-                margin: '0.5em 0 0',
-                fontSize: 'clamp(0.7rem, 1.1vw, 0.95rem)',
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 500,
-                color: 'rgba(255,255,255,0.75)',
-              }}>
-                {topSpeakers[0]?.role}
-                {topSpeakers[0]?.company && (
-                  <span style={{ color: 'rgba(255, 255, 255, 0.78)', fontWeight: 400 }}>
-                    {' '}· {topSpeakers[0].company}
-                  </span>
-                )}
-              </p>
-
-              {/* Gold divider */}
-              <div style={{
-                width: '2rem',
-                height: '2px',
-                background: '#d4af37',
-                margin: '0.9em 0',
-                borderRadius: '2px',
-                opacity: 0.75,
-              }} />
-
-              {/* Talk title */}
-              <p style={{
-                margin: 0,
-                fontSize: 'clamp(0.6rem, 0.95vw, 0.85rem)',
-                fontFamily: "'Georgia', serif",
-                fontStyle: 'italic',
-                color: 'rgba(255, 255, 255, 0.95)',
-                lineHeight: 1.6,
-                maxWidth: '30ch',
-              }}>
-                "{topSpeakers[0]?.talk}"
-              </p>
-
-              {/* Bio */}
-              <p style={{
-                margin: '0.8em 0 0',
-                fontSize: 'clamp(0.55rem, 0.85vw, 0.75rem)',
-                fontFamily: "'Inter', sans-serif",
-                color: 'rgba(255, 255, 255, 0.89)',
-                lineHeight: 1.65,
-                maxWidth: '34ch',
-              }}>
-                {topSpeakers[0]?.bio}
-              </p>
-
-              {/* Social Icons */}
-              <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.1em' }}>
-                {topSpeakers[0]?.socials?.linkedin && (
-                  <a href={topSpeakers[0].socials.linkedin} target="_blank" rel="noreferrer" className="social-icon" style={iconBtnStyle}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                      <rect width="4" height="12" x="2" y="9" /><circle cx="4" cy="4" r="2" />
-                    </svg>
-                  </a>
-                )}
-                {topSpeakers[0]?.socials?.twitter && (
-                  <a href={topSpeakers[0].socials.twitter} target="_blank" rel="noreferrer" className="social-icon" style={iconBtnStyle}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                    </svg>
-                  </a>
-                )}
-                {topSpeakers[0]?.socials?.github && (
-                  <a href={topSpeakers[0].socials.github} target="_blank" rel="noreferrer" className="social-icon" style={iconBtnStyle}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-                    </svg>
-                  </a>
-                )}
-                {topSpeakers[0]?.socials?.instagram && (
-                  <a href={topSpeakers[0].socials.instagram} target="_blank" rel="noreferrer" className="social-icon" style={iconBtnStyle}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                    </svg>
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* Podium + Speaker composite — right spotlight */}
-            <div style={{
-              position: 'absolute',
-              right: '10%',
-              bottom: 0,
-              width: '22%',
-            }}>
-              {/* Speaker — bottom anchored to the podium desk top (~38% up from base of podium) */}
-              {/* NOTE: 38% offset is tuned to this specific podium.png — re-tune if podium asset changes */}
-              <img
-                src={topSpeakers[0]?.image}
-                alt={topSpeakers[0]?.name}
-                style={{
-                  position: 'absolute',
-                  bottom: '75%',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '90%',
-                  objectFit: 'contain',
-                  objectPosition: 'bottom',
-                  filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))',
-                  zIndex: 1,
-                }}
-              />
-              {/* Podium — sits above speaker in z-order to mask lower body */}
-              <img
-                src="/podium.png"
-                alt="Podium"
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  display: 'block',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.6))',
-                  zIndex: 2,
-                }}
-              />
-            </div>
-          </section>
-        </motion.div>
-      </section>
-
-      {/* ─── PANEL B (Foreground Layer) ─── */}
-      <section
-        ref={panelBRef}
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          backgroundColor: 'var(--bg)',
-          borderTopLeftRadius: '32px',
-          borderTopRightRadius: '32px',
-          boxShadow: '0 -20px 40px rgba(0,0,0,0.5)',
-          paddingTop: '2rem'
-        }}
-      >
-        <div style={styles.contentWrap}>
-          {/* ─── SCHEDULE ─── */}
-          <section>
-            <RevealText>
-              <h2 className="section-title">Schedule</h2>
-            </RevealText>
-            <RevealBreath delay={0.1} style={{ marginTop: '2rem' }}>
-              <TimelineSchedule schedDay={schedDay} setSchedDay={setSchedDay} />
-            </RevealBreath>
-          </section>
-
-
-
-          {/* ─── SPONSORS ─── */}
-          <section>
-            <RevealText>
-              <h2 className="section-title">Sponsors</h2>
-            </RevealText>
-            <StaggerGroup style={styles.sponsorGrid}>
-              {SPONSORS.map(s => (
-                <StaggerItem key={s} style={styles.sponsorCard}>
-                  {s}
-                </StaggerItem>
-              ))}
-            </StaggerGroup>
-          </section>
-
-          {/* ─── FAQ ─── */}
-          <section id="faqs" style={{ marginBottom: '5rem' }}>
-            <RevealText>
-              <h2 className="section-title">FAQ</h2>
-            </RevealText>
-            <RevealBreath delay={0.1} style={{ marginTop: '1.5rem' }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {FAQS.map(([q, a], i) => (
-                  <div key={i} style={styles.faqItem}>
-                    <button
-                      style={styles.faqQ}
-                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      aria-expanded={openFaq === i}
-                    >
-                      <span>{q}</span>
-                      <motion.span animate={{ rotate: openFaq === i ? 180 : 0 }} transition={{ duration: 0.22 }} style={{ flexShrink: 0 }}>
-                        <ChevronDown size={18} />
-                      </motion.span>
-                    </button>
-                    <AnimatePresence>
-                      {openFaq === i && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25 }}
-                          style={{ overflow: 'hidden' }}
-                        >
-                          <p style={styles.faqA}>{a}</p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
-              </div>
-            </RevealBreath>
-          </section>
-        </div>
-      </section>
-                         </div>
-                     );
-                 }}
+                          </div>
+                      );
+                  }}
               </SwitchEventCard>
-          </div>
+            </div>
 
-          <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
-
-
-
-          </div>
-
-          {/* Scroll Cue */}
-          <AnimatePresence>
-              {(bootState === 'D' || bootState === 'E') && (
-                  <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5, duration: 1 }}
-                      style={{
-                          position: 'absolute',
-                          bottom: '2rem',
-                          color: 'var(--signature-gold)',
-                          animation: 'bounce 2s infinite'
-                      }}
-                  >
-                      <ChevronDown size={32} />
-                  </motion.div>
-              )}
-          </AnimatePresence>
-          
-          <style>{`
-              @keyframes bounce {
-                  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-                  40% { transform: translateY(-10px); }
-                  60% { transform: translateY(-5px); }
-              }
-          `}</style>
+            <div style={{ flex: 1, width: '100%' }} />
           </div>
       </section>
-
-      
     </main>
   );
 }

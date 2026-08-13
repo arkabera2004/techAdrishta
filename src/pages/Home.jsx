@@ -1,8 +1,12 @@
 // src/pages/Home.jsx
 import { useState, useRef, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue } from 'framer-motion';
 import { ChevronDown, ArrowRight } from 'lucide-react';
+import SwitchRulesCard from '../components/SwitchRulesCard';
+import TedTalk from '../components/TedTalk';
+import FaqSection from '../components/FaqSection';
+import bgMusicFile from '../../public/audiotrack.mp3';
 
 import FlipClock from '../components/FlipClock';
 import TicketCard from '../components/TicketCard';
@@ -18,7 +22,6 @@ import { schedule, scheduleColors } from '../data/schedule';
 import { RevealText, RevealBreath, StaggerGroup, StaggerItem } from '../components/animations/Reveal';
 import SwitchEventCard from '../components/SwitchEventCard.jsx';
 import TimelineSchedule from '../components/TimelineSchedule.jsx';
-import TedTalk from '../components/TedTalk.jsx';
 
 /* ─── Constants & Data ─── */
 const SPONSORS = ["HP", "DELL", "GOOGLE", "COCO COLA", "REDBULL", "JAVA"];
@@ -128,7 +131,7 @@ export default function Home() {
   // 1. Scroll Prevention During Boot
   useEffect(() => {
     // Only allow scrolling once bootState has reached at least C
-    if (bootState === 'C' || bootState === 'D' || bootState === 'E' || bootState === 'F' || bootState === 'G') {
+    if (bootState === 'C' || bootState === 'D' || bootState === 'E' || bootState === 'F' || bootState === 'FAQ' || bootState === 'G') {
       document.body.style.overflow = '';
     } else {
       document.body.style.overflow = 'hidden';
@@ -279,14 +282,17 @@ export default function Home() {
           zIndex: 10,
           backgroundColor: !isScrolling ? 'transparent' : 'var(--bg)',
           paddingTop: !isScrolling ? (navbarHeight || 0) : '2rem',
-          opacity: !isScrolling ? (bootState === 'F' || bootState === 'G' ? 1 : 0) : 1,
-          pointerEvents: !isScrolling ? (bootState === 'F' || bootState === 'G' ? 'auto' : 'none') : 'auto',
+          opacity: !isScrolling ? (bootState === 'F' || bootState === 'FAQ' || bootState === 'G' ? 1 : 0) : 1,
+          pointerEvents: !isScrolling ? (bootState === 'F' || bootState === 'FAQ' || bootState === 'G' ? 'auto' : 'none') : 'auto',
           transition: 'opacity 0.5s ease',
         }}
       >
 
         {/* ─── TED TALK (F) ─── */}
         <TedTalk isVisible={bootState === 'F' || isScrolling} opacity={!isScrolling && bootState !== 'F' ? 0 : 1} blackFade={blackFade} screenHeight={screenHeight} navbarHeight={navbarHeight} />
+
+        {/* ─── FAQ SECTION (FAQ) ─── */}
+        <FaqSection isVisible={bootState === 'FAQ' || isScrolling} opacity={!isScrolling && bootState !== 'FAQ' ? 0 : 1} isScrolling={isScrolling} blackFade={blackFade} screenHeight={screenHeight} navbarHeight={navbarHeight} />
 
         <div style={!isScrolling ? { margin: 0, padding: 0 } : styles.contentWrap}>
 

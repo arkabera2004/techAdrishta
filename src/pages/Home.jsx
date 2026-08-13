@@ -97,6 +97,24 @@ export default function Home() {
   const showHeroDetails = bootState === 'D' || bootState === 'E';
   const showMobileStart = bootState === 'D' && !mobileStartClicked;
 
+  // 1. Scroll Prevention During Boot
+  useEffect(() => {
+    // Only allow scrolling once bootState has reached at least C
+    if (bootState === 'C' || bootState === 'D' || bootState === 'E') {
+      document.body.style.overflow = '';
+    } else {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [bootState]);
+
+  // 2. Setup Sticky Scroll Container
+  const heroWrapperRef = useRef(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroWrapperRef,
+    offset: ["start start", "end end"]
+  });
+
   const panelARef = useRef(null);
   const { scrollYProgress: panelAProgress } = useScroll({
     target: panelARef,
@@ -168,18 +186,19 @@ export default function Home() {
   return (
     <main style={{ backgroundColor: '#000', paddingTop: 0 }}>
       {/* ─── NEW HERO ─── */}
-      <section style={{ 
-          minHeight: '100svh', 
-          backgroundColor: '#0A0908', 
-          display: 'flex', 
-          flexDirection: 'column', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          position: 'relative',
-          paddingTop: 0,
-          overflow: 'hidden'
-      }}>
-          {/* Radial glow */}
+      <section ref={heroWrapperRef} style={{ height: '300vh', position: 'relative', zIndex: 20 }}>
+          <div style={{ 
+              position: 'sticky',
+              top: 0,
+              height: '100vh',
+              backgroundColor: '#0A0908', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              overflow: 'hidden'
+          }}>
+              {/* Radial glow */}
           <div style={{
               position: 'absolute',
               top: '50%',
@@ -197,7 +216,11 @@ export default function Home() {
           <div style={{ flex: 1, width: '100%' }} />
 
           <div style={{ zIndex: 10, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <SwitchEventCard onBootStateChange={setBootState} isZoomingOut={bootSequenceTriggered} />
+              <SwitchEventCard 
+                onBootStateChange={setBootState} 
+                isZoomingOut={bootSequenceTriggered} 
+                scrollYProgress={heroProgress}
+              />
           </div>
 
           <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
@@ -232,6 +255,7 @@ export default function Home() {
                   60% { transform: translateY(-5px); }
               }
           `}</style>
+          </div>
       </section>
 
       {/* ─── PANEL A (Foreground Layer) ─── */}

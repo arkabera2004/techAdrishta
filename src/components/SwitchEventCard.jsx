@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Wordmark from "./Wordmark";
-import { motion } from "framer-motion";
+import { motion, useTransform, useMotionValue } from "framer-motion";
 import FlipClock from "./FlipClock";
 import PixelCountdown from "./PixelCountdown";
 
@@ -38,10 +38,39 @@ function useGoogleFonts() {
     }, []);
 }
 
-export default function SwitchEventCard({ forceStateE = false, isZoomingOut = true, onStateE = () => { }, onBootStateChange = () => { } }) {
+export default function SwitchEventCard({ forceStateE = false, isZoomingOut = true, onStateE = () => { }, onBootStateChange = () => { }, scrollYProgress }) {
     useGoogleFonts();
     const scrollRef = useRef(null);
     const [pressed, setPressed] = useState(null);
+
+    const fallbackScroll = useMotionValue(0);
+    const effectiveScroll = scrollYProgress || fallbackScroll;
+
+    const [maxScale, setMaxScale] = useState(1.35);
+
+    useEffect(() => {
+        function updateScale() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            const containerWidth = Math.min(0.95 * w, 1.9 * h);
+            // Inner screen height is 420/1000 = 0.42 of the container width
+            // We want the inner screen to exactly fit the viewport height
+            let scale = h / (0.42 * containerWidth);
+            // Add a tiny bit of padding so it doesn't perfectly touch the edges
+            scale = scale * 0.98;
+            setMaxScale(scale);
+        }
+        updateScale();
+        window.addEventListener('resize', updateScale);
+        return () => window.removeEventListener('resize', updateScale);
+    }, []);
+
+    // Joy-Con scroll animations
+    const leftJoyconX = useTransform(effectiveScroll, [0, 0.4], [0, -800]);
+    const rightJoyconX = useTransform(effectiveScroll, [0, 0.4], [0, 800]);
+
+    // Console zoom animation
+    const consoleScaleScroll = useTransform(effectiveScroll, [0.4, 1], [1, maxScale]);
 
 
     const [bootState, setBootState] = useState('A');
@@ -159,13 +188,13 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
     };
 
     return (
-        <motion.div
-            className="mx-auto overflow-hidden sm:overflow-visible"
-            style={{ width: 'min(95vw, 190vh)' }}
-            initial={{ scale: 4, opacity: 1 }}
-            animate={{ scale: isZoomingOut ? 1 : 4, opacity: 1 }}
-            transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }} // cinematic pull back
-        >
+        <motion.div style={{ scale: consoleScaleScroll, transformOrigin: 'center center', width: 'min(95vw, 190vh)', position: 'relative' }} className="mx-auto">
+            <motion.div
+                className="mx-auto overflow-hidden sm:overflow-visible w-full h-full"
+                initial={{ scale: 4, opacity: 1 }}
+                animate={{ scale: isZoomingOut ? 1 : 4, opacity: 1 }}
+                transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }} // cinematic pull back
+            >
             <div className="switch-scaler relative w-full" style={{ aspectRatio: '1000/480', containerType: 'inline-size' }}>
                 <style>{`
                     .switch-particle-wrapper {
@@ -386,11 +415,12 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                         <rect x="125" y="30" width="750" height="420" fill="#0a0a0c" />
 
                         {/* ================= LEFT JOY-CON (blue) ================= */}
-                        <motion.g
-                            initial={{ x: -400 }}
-                            animate={{ x: isZoomingOut ? 0 : -400 }}
-                            transition={{ delay: 0.5, duration: 1, type: "spring", stiffness: 100, damping: 12, mass: 1 }}
-                        >
+                        <motion.g style={{ x: leftJoyconX }}>
+                            <motion.g
+                                initial={{ x: -400 }}
+                                animate={{ x: isZoomingOut ? 0 : -400 }}
+                                transition={{ delay: 0.5, duration: 1, type: "spring", stiffness: 100, damping: 12, mass: 1 }}
+                            >
                             {/* L-Shoulder Button removed to avoid clipping artifacts */}
 
                             <path
@@ -462,14 +492,16 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                             </g>
                             <rect x="80" y="60" width="16" height="5" rx="1.5" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
 
+                            </motion.g>
                         </motion.g>
 
                         {/* ================= RIGHT JOY-CON (red) ================= */}
-                        <motion.g
-                            initial={{ x: 400 }}
-                            animate={{ x: isZoomingOut ? 0 : 400 }}
-                            transition={{ delay: 0.5, duration: 1, type: "spring", stiffness: 100, damping: 12, mass: 1 }}
-                        >
+                        <motion.g style={{ x: rightJoyconX }}>
+                            <motion.g
+                                initial={{ x: 400 }}
+                                animate={{ x: isZoomingOut ? 0 : 400 }}
+                                transition={{ delay: 0.5, duration: 1, type: "spring", stiffness: 100, damping: 12, mass: 1 }}
+                            >
                             <path
                                 d="M 890,0 L 944,0 A 56,56 0 0 1 1000,56 L 1000,424 A 56,56 0 0 1 944,480 L 890,480 Z"
                                 fill="url(#redJoycon)"
@@ -535,6 +567,7 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                             <line x1="945" y1="317" x2="945" y2="322" stroke="#080808" strokeWidth="2" strokeLinecap="round" />
                             <line x1="910" y1="286" x2="915" y2="286" stroke="#080808" strokeWidth="2" strokeLinecap="round" />
                             <line x1="980" y1="286" x2="975" y2="286" stroke="#080808" strokeWidth="2" strokeLinecap="round" />
+                            </motion.g>
                         </motion.g>
                     </g>
                 </svg>
@@ -792,6 +825,7 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
         .switch-screen-scroll::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
         .switch-screen-scroll::-webkit-scrollbar-track { background: transparent; }
       `}</style>
+            </motion.div>
         </motion.div>
     );
 }

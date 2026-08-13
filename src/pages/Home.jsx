@@ -285,9 +285,10 @@ export default function Home() {
         }}
       >
 
+        {/* ─── TED TALK (F) ─── */}
+        <TedTalk isVisible={bootState === 'F' || isScrolling} opacity={!isScrolling && bootState !== 'F' ? 0 : 1} blackFade={blackFade} screenHeight={screenHeight} navbarHeight={navbarHeight} />
+
         <div style={!isScrolling ? { margin: 0, padding: 0 } : styles.contentWrap}>
-          {/* ─── TED TALK (F) ─── */}
-          <TedTalk isVisible={bootState === 'F' || isScrolling} opacity={!isScrolling && bootState !== 'F' ? 0 : 1} blackFade={blackFade} screenHeight={screenHeight} navbarHeight={navbarHeight} />
 
           {/* ─── FEATURED TICKETS (G) ─── */}
           <section style={{ display: !isScrolling && bootState !== 'G' ? 'none' : 'block', opacity: !isScrolling && bootState !== 'G' ? 0 : 1, transition: 'opacity 0.25s' }}>

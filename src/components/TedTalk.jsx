@@ -13,7 +13,7 @@ const ChamferBox = ({ children, className, style, innerClassName, innerStyle, bo
 
 const TedTalk = ({ isVisible, opacity, blackFade, screenHeight, navbarHeight }) => {
     return (
-        <div className="w-full flex-shrink-0 flex flex-col items-center animate-in fade-in duration-300 z-10" style={{ height: screenHeight && navbarHeight ? `${screenHeight - navbarHeight}px` : "36.7cqi", padding: '1.5cqi 2.5cqi 1cqi 2.5cqi', transition: 'opacity 0.25s ease', opacity: blackFade ? 0 : 1, display: isVisible ? 'flex' : 'none' }}>
+        <div className="w-full flex-shrink-0 flex flex-col items-center animate-in fade-in duration-300 z-10" style={{ height: screenHeight && navbarHeight ? `${screenHeight - navbarHeight}px` : "36.7cqi", padding: '1.5cqi 2cqi 1cqi 2cqi', transition: 'opacity 0.25s ease', opacity: blackFade ? 0 : 1, display: isVisible ? 'flex' : 'none' }}>
             {/* Main Outlined Container */}
             <div
                 className="w-full h-full flex flex-col shadow-lg"

@@ -278,7 +278,7 @@ export default function Home() {
           height: !isScrolling ? '100%' : 'auto',
           zIndex: 10,
           backgroundColor: !isScrolling ? 'transparent' : 'var(--bg)',
-          paddingTop: !isScrolling ? 0 : '2rem',
+          paddingTop: !isScrolling ? (navbarHeight || 0) : '2rem',
           opacity: !isScrolling ? (bootState === 'F' || bootState === 'G' ? 1 : 0) : 1,
           pointerEvents: !isScrolling ? (bootState === 'F' || bootState === 'G' ? 'auto' : 'none') : 'auto',
           transition: 'opacity 0.5s ease',

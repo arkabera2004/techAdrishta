@@ -125,8 +125,6 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
         sessionStorage.setItem('bootPlayed', 'true');
 
         const t1 = setTimeout(() => {
-            const audio = new Audio('/chime.mp3');
-            audio.play().catch(e => console.log('Audio play failed:', e));
             setBootState('B');
         }, zoomOutDelay + 400);
 
@@ -161,6 +159,10 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
     const playSound = () => {
         const audio = new Audio('/button.mp3');
         audio.play().catch(e => console.log('Audio play failed:', e));
+    };
+
+    const playButtonClick = () => {
+        new Audio('/buttonclick.mp3').play().catch(e => console.log('Audio play failed:', e));
     };
 
     const press = (id, action) => {
@@ -548,7 +550,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
 
                             <g filter="url(#buttonShadow)">
                                 {/* Minus Button */}
-                                <rect x="80" y="60" width="16" height="5" rx="1.5" fill="#141415" />
+                                <rect x="80" y="60" width="16" height="5" rx="1.5" fill={pressed === "minus" ? "#5a9ae6" : "#141415"} onPointerDown={() => press("minus")} style={{ cursor: "pointer" }} />
                             </g>
                             <rect x="80" y="60" width="16" height="5" rx="1.5" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
 
@@ -583,7 +585,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
 
                             {/* Plus Button */}
                             <g filter="url(#buttonShadow)">
-                                <path d="M 922.5,62.5 h 5 v 5.5 h 5.5 v 5 h -5.5 v 5.5 h -5 v -5.5 h -5.5 v -5 h 5.5 z" fill="#141415" />
+                                <path d="M 922.5,62.5 h 5 v 5.5 h 5.5 v 5 h -5.5 v 5.5 h -5 v -5.5 h -5.5 v -5 h 5.5 z" fill={pressed === "plus" ? "#5a9ae6" : "#141415"} onPointerDown={() => press("plus")} style={{ cursor: "pointer" }} />
                             </g>
                             <path d="M 922.5,62.5 h 5 v 5.5 h 5.5 v 5 h -5.5 v 5.5 h -5 v -5.5 h -5.5 v -5 h 5.5 z" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
 
@@ -597,24 +599,24 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                             {/* ABXY diamond */}
                             <g fontFamily="sans-serif" fontSize="16" fontWeight="bold" fill="#b0b0b5" textAnchor="middle">
                                 {/* X */}
-                                <circle cx="945" cy="142" r="14" fill="url(#buttonGrad)" filter="url(#buttonShadow)" />
+                                <circle cx="945" cy="142" r="14" fill={pressed === "X" ? "#5a9ae6" : "url(#buttonGrad)"} filter="url(#buttonShadow)" onPointerDown={() => press("X")} style={{ cursor: "pointer" }} />
                                 <circle cx="945" cy="142" r="13" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" pointerEvents="none" />
-                                <text x="945" y="142" dy="0.35em">X</text>
+                                <text x="945" y="142" dy="0.35em" style={{ pointerEvents: "none" }}>X</text>
 
                                 {/* A */}
-                                <circle cx="975" cy="172" r="14" fill="url(#buttonGrad)" filter="url(#buttonShadow)" />
+                                <circle cx="975" cy="172" r="14" fill={pressed === "A" ? "#5a9ae6" : "url(#buttonGrad)"} filter="url(#buttonShadow)" onPointerDown={() => press("A")} style={{ cursor: "pointer" }} />
                                 <circle cx="975" cy="172" r="13" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" pointerEvents="none" />
-                                <text x="975" y="172" dy="0.35em">A</text>
+                                <text x="975" y="172" dy="0.35em" style={{ pointerEvents: "none" }}>A</text>
 
                                 {/* Y */}
-                                <circle cx="915" cy="172" r="14" fill="url(#buttonGrad)" filter="url(#buttonShadow)" />
+                                <circle cx="915" cy="172" r="14" fill={pressed === "Y" ? "#5a9ae6" : "url(#buttonGrad)"} filter="url(#buttonShadow)" onPointerDown={() => press("Y")} style={{ cursor: "pointer" }} />
                                 <circle cx="915" cy="172" r="13" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" pointerEvents="none" />
-                                <text x="915" y="172" dy="0.35em">Y</text>
+                                <text x="915" y="172" dy="0.35em" style={{ pointerEvents: "none" }}>Y</text>
 
                                 {/* B */}
-                                <circle cx="945" cy="202" r="14" fill="url(#buttonGrad)" filter="url(#buttonShadow)" />
+                                <circle cx="945" cy="202" r="14" fill={pressed === "B" ? "#5a9ae6" : "url(#buttonGrad)"} filter="url(#buttonShadow)" onPointerDown={() => press("B")} style={{ cursor: "pointer" }} />
                                 <circle cx="945" cy="202" r="13" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" pointerEvents="none" />
-                                <text x="945" y="202" dy="0.35em">B</text>
+                                <text x="945" y="202" dy="0.35em" style={{ pointerEvents: "none" }}>B</text>
                             </g>
 
                             {/* Thumbstick */}
@@ -681,8 +683,19 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                                 {/* FAQ Mario block button */}
                                 <button
                                     onClick={() => {
+                                        playButtonClick();
                                         if (window.location.pathname === '/') {
-                                            document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
+                                            if (!isScrolling) {
+                                                if (bootState !== 'FAQ') {
+                                                    setBlackFade(true);
+                                                    setTimeout(() => {
+                                                        setBootState('FAQ');
+                                                        setBlackFade(false);
+                                                    }, 300);
+                                                }
+                                            } else {
+                                                document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
+                                            }
                                         } else {
                                             window.location.href = '/#faqs';
                                         }
@@ -760,7 +773,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                                             <p>all under one roof.</p>
                                         </div>
 
-                                        <button className="pixel-btn" style={{ marginTop: '1.5cqi', marginBottom: '1.5cqi' }} onClick={(e) => { e.preventDefault(); if(onRegisterClick) onRegisterClick(); }}>
+                                        <button className="pixel-btn" style={{ marginTop: '1.5cqi', marginBottom: '1.5cqi' }} onClick={(e) => { e.preventDefault(); playButtonClick(); if(onRegisterClick) onRegisterClick(); }}>
                                             REGISTER NOW <span style={{ fontFamily: 'sans-serif', fontWeight: 'bold' }}>&gt;</span>
                                         </button>
 
@@ -860,7 +873,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                                     {/* Buttons Row */}
                                     <div className="flex items-center gap-[3cqi]" style={{ marginTop: '0.5cqi' }}>
                                         <button className="hover:scale-105 transition-transform flex items-center justify-center" 
-                                            onClick={(e) => { e.preventDefault(); if(onRegisterClick) onRegisterClick(); else window.location.href = '/events'; }}
+                                            onClick={(e) => { e.preventDefault(); playButtonClick(); if(onRegisterClick) onRegisterClick(); else window.location.href = '/events'; }}
                                             style={{ 
                                                 backgroundColor: '#ffb800', 
                                                 color: '#000',
@@ -875,7 +888,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                                             REGISTER NOW &gt;
                                         </button>
                                         <button className="hover:scale-105 transition-transform flex items-center justify-center" 
-                                            onClick={() => window.location.href = '/events'}
+                                            onClick={() => { playButtonClick(); window.location.href = '/events'; }}
                                             style={{ 
                                                 backgroundColor: 'rgba(0,0,0,0.6)',
                                                 color: '#fff',

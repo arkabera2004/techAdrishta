@@ -65,9 +65,10 @@ const faqData = [
 ];
 
 export default function FaqSection({ isVisible, opacity, scrollContainerRef, isScrolling, blackFade, screenHeight, navbarHeight }) {
-    const [expandedRow, setExpandedRow] = useState(1);
+    const [expandedRow, setExpandedRow] = useState(null);
 
     const toggleRow = (id) => {
+        new Audio('/buttonclick.mp3').play().catch(() => {});
         setExpandedRow(prev => prev === id ? null : id);
     };
 
@@ -76,6 +77,7 @@ export default function FaqSection({ isVisible, opacity, scrollContainerRef, isS
 
     return (
         <section
+            id="faqs"
             className="w-full flex-shrink-0 flex flex-col items-center animate-in fade-in duration-300 z-10"
             style={{
                 display: !isScrolling && !isVisible ? 'none' : 'flex',

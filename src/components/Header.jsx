@@ -21,6 +21,10 @@ export default function Header() {
   const location = useLocation();
   const isHome = location.pathname === "/";
 
+  const playClick = () => {
+    new Audio('/buttonclick.mp3').play().catch(() => {});
+  };
+
   const isActive = (to) =>
     to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
 
@@ -63,6 +67,7 @@ export default function Header() {
         <Link
           to={isHome ? "#" : "/register"}
           onClick={(e) => {
+            playClick();
             if (isHome) {
               e.preventDefault();
               window.dispatchEvent(new Event('triggerRegisterAutoZoom'));
@@ -86,6 +91,7 @@ export default function Header() {
                 <Link
                   key={link.to}
                   to={link.to}
+                  onClick={playClick}
                   style={{
                     ...styles.navLink,
                     color: isTarget ? 'var(--signature-gold)' : 'var(--text-muted)',
@@ -106,7 +112,7 @@ export default function Header() {
             className="mobile-only"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => { playClick(); setMenuOpen((open) => !open); }}
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -130,7 +136,7 @@ export default function Header() {
                   <Link
                     key={link.to}
                     to={link.to}
-                    onClick={() => setMenuOpen(false)}
+                    onClick={() => { playClick(); setMenuOpen(false); }}
                     style={{
                       ...styles.mobileLink,
                       background: active ? 'rgba(212, 175, 55, 0.1)' : 'transparent',

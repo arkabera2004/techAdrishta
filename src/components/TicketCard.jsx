@@ -132,6 +132,7 @@ export default function TicketCard({ event, tilt = 0 }) {
   function handleRegister(e) {
     if (e) e.stopPropagation();
     if (isSoldOut) return;
+    new Audio('/buttonclick.mp3').play().catch(() => {});
     
     // Auto zoom animation on Home page instead of tear animation
     if (location.pathname === '/') {

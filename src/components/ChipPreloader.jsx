@@ -107,6 +107,7 @@ export default function ChipPreloader({ onComplete, onTriggerZoomOut = () => {} 
     const tracesRef = useRef(null);
 
     useEffect(() => {
+
         let ctx = gsap.context(() => {
             const traceEls = gsap.utils.toArray('.trace-path');
             const dotEls = gsap.utils.toArray('.trace-dot');

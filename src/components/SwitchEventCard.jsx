@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
 import Wordmark from "./Wordmark";
 import { motion } from "framer-motion";
 import FlipClock from "./FlipClock";
@@ -43,16 +42,10 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
     useGoogleFonts();
     const scrollRef = useRef(null);
     const [pressed, setPressed] = useState(null);
-    const [page, setPage] = useState(0);
+
 
     const [bootState, setBootState] = useState('A');
-    const [isMuted, setIsMuted] = useState(false);
     const [blackFade, setBlackFade] = useState(false);
-    const isMutedRef = useRef(isMuted);
-
-    useEffect(() => {
-        isMutedRef.current = isMuted;
-    }, [isMuted]);
 
     useEffect(() => {
         if (forceStateE) {
@@ -76,10 +69,8 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
         sessionStorage.setItem('bootPlayed', 'true');
 
         const t1 = setTimeout(() => {
-            if (!isMutedRef.current) {
-                const audio = new Audio('/chime.mp3');
-                audio.play().catch(e => console.log('Audio play failed:', e));
-            }
+            const audio = new Audio('/chime.mp3');
+            audio.play().catch(e => console.log('Audio play failed:', e));
             setBootState('B');
         }, zoomOutDelay + 400);
 
@@ -127,43 +118,43 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
         setTimeout(() => setPressed(null), 120);
     };
 
-    const nextPage = () => {
-        setBlackFade(true);
-        setTimeout(() => {
-            setPage((p) => Math.min(p + 1, 1));
-            setBlackFade(false);
-        }, 300);
-    };
-
-    const prevPage = () => {
-        setBlackFade(true);
-        setTimeout(() => {
-            setPage((p) => Math.max(p - 1, 0));
-            setBlackFade(false);
-        }, 300);
-    };
-
-    const handleNext = () => {
-        if (bootState === 'D') {
+    const handleDown = () => {
+        if (bootState === 'C' || bootState === 'D') {
             setBlackFade(true);
             setTimeout(() => {
                 setBootState('E');
                 setBlackFade(false);
             }, 300);
-        } else if (bootState === 'E') {
-            nextPage();
         }
     };
 
-    const handleBack = () => {
-        if (bootState === 'E' && page === 0) {
+    const handleUp = () => {
+        if (bootState === 'E') {
             setBlackFade(true);
             setTimeout(() => {
                 setBootState('D');
                 setBlackFade(false);
             }, 300);
-        } else if (bootState === 'E' && page > 0) {
-            prevPage();
+        }
+    };
+
+    const navRoutes = ['/', '/events', '/talks', '/gallery', '/team'];
+
+    const handleRight = () => {
+        const currentIdx = navRoutes.indexOf(window.location.pathname);
+        if (currentIdx !== -1 && currentIdx < navRoutes.length - 1) {
+            window.location.href = navRoutes[currentIdx + 1];
+        } else {
+            window.location.href = navRoutes[0];
+        }
+    };
+
+    const handleLeft = () => {
+        const currentIdx = navRoutes.indexOf(window.location.pathname);
+        if (currentIdx > 0) {
+            window.location.href = navRoutes[currentIdx - 1];
+        } else {
+            window.location.href = navRoutes[navRoutes.length - 1];
         }
     };
 
@@ -437,22 +428,22 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                             {/* D-pad: four individual button caps */}
                             <g filter="url(#buttonShadow)">
                                 {/* up */}
-                                <circle cx="55" cy="219" r="14" fill={pressed === "up" ? "#5a9ae6" : "url(#buttonGrad)"} onPointerDown={() => press("up", () => scrollBy(-70))} style={{ cursor: "pointer" }} />
+                                <circle cx="55" cy="219" r="14" fill={pressed === "up" ? "#5a9ae6" : "url(#buttonGrad)"} onPointerDown={() => press("up", handleUp)} style={{ cursor: "pointer" }} />
                                 <circle cx="55" cy="219" r="13" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" pointerEvents="none" />
                                 <polygon points="55,212 50,218 60,218" fill="#000" opacity="0.75" pointerEvents="none" />
 
                                 {/* left */}
-                                <circle cx="25" cy="249" r="14" fill={pressed === "left" ? "#5a9ae6" : "url(#buttonGrad)"} onPointerDown={() => press("left", handleBack)} style={{ cursor: "pointer" }} />
+                                <circle cx="25" cy="249" r="14" fill={pressed === "left" ? "#5a9ae6" : "url(#buttonGrad)"} onPointerDown={() => press("left", handleLeft)} style={{ cursor: "pointer" }} />
                                 <circle cx="25" cy="249" r="13" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" pointerEvents="none" />
                                 <polygon points="18,249 24,244 24,254" fill="#000" opacity="0.75" pointerEvents="none" />
 
                                 {/* right */}
-                                <circle cx="85" cy="249" r="14" fill={pressed === "right" ? "#5a9ae6" : "url(#buttonGrad)"} onPointerDown={() => press("right", handleNext)} style={{ cursor: "pointer" }} />
+                                <circle cx="85" cy="249" r="14" fill={pressed === "right" ? "#5a9ae6" : "url(#buttonGrad)"} onPointerDown={() => press("right", handleRight)} style={{ cursor: "pointer" }} />
                                 <circle cx="85" cy="249" r="13" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" pointerEvents="none" />
                                 <polygon points="92,249 86,244 86,254" fill="#000" opacity="0.75" pointerEvents="none" />
 
                                 {/* down */}
-                                <circle cx="55" cy="279" r="14" fill={pressed === "down" ? "#5a9ae6" : "url(#buttonGrad)"} onPointerDown={() => press("down", () => scrollBy(70))} style={{ cursor: "pointer" }} />
+                                <circle cx="55" cy="279" r="14" fill={pressed === "down" ? "#5a9ae6" : "url(#buttonGrad)"} onPointerDown={() => press("down", handleDown)} style={{ cursor: "pointer" }} />
                                 <circle cx="55" cy="279" r="13" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" pointerEvents="none" />
                                 <polygon points="55,286 50,280 60,280" fill="#000" opacity="0.75" pointerEvents="none" />
                             </g>
@@ -558,66 +549,61 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                         height: '87.5%',   /* 420 / 480 */
                         borderRadius: '0.6%', /* Matches rx=4 proportionally */
                         overflow: 'hidden',
-                        backgroundColor: '#0B0F1C',
-                        transition: 'opacity 0.25s ease',
-                        opacity: blackFade ? 0 : 1
+                        backgroundColor: '#0B0F1C'
                     }}
                 >
                     <div
                         ref={scrollRef}
-                        className="switch-screen-scroll w-full h-full overflow-hidden flex items-center justify-center relative"
+                        className="switch-screen-scroll w-full h-full overflow-hidden flex flex-col relative"
                         style={{ backgroundColor: '#060a14' }}
                     >
-                        {/* STATE A: Mute button */}
-                        {bootState === 'A' && (
-                            <motion.button
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 1.5, duration: 0.5 }}
-                                onClick={() => setIsMuted(!isMuted)}
-                                className="absolute bottom-4 right-4 text-white/30 hover:text-white/80 transition-colors z-20"
-                                aria-label="Toggle startup sound"
-                            >
-                                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                            </motion.button>
+                        {/* STATE A is empty screen before boot */}
+
+                        {/* Shared Background for C, D, E */}
+                        {(bootState === 'C' || bootState === 'D' || bootState === 'E') && (
+                            <div className="absolute inset-0 w-full h-full pointer-events-none stars-bg opacity-70 z-0"></div>
+                        )}
+
+                        {/* Shared Navbar for C, D, E */}
+                        {(bootState === 'C' || bootState === 'D' || bootState === 'E') && (
+                            <div className="w-full flex justify-between items-center px-[4cqi] py-[1.5cqi] border-b border-[rgba(135,206,235,0.15)] animate-in fade-in slide-in-from-top-4 duration-700 relative z-20">
+                                {/* Spacer to keep nav centered */}
+                                <div style={{ width: '2.5cqi' }}></div>
+                                <div className="flex items-center gap-[3cqi]">
+                                    <div className="pixel-nav-link active" style={{ fontSize: '0.8cqi', padding: '0.5cqi 0.8cqi' }}>HOME</div>
+                                    <div className="pixel-nav-link" style={{ fontSize: '0.8cqi' }} onClick={() => window.location.href = '/events'}>EVENTS</div>
+                                    <div className="pixel-nav-link" style={{ fontSize: '0.8cqi' }} onClick={() => window.location.href = '/talks'}>TECH TALK</div>
+                                    <div className="pixel-nav-link" style={{ fontSize: '0.8cqi' }} onClick={() => window.location.href = '/gallery'}>GALLERY</div>
+                                    <div className="pixel-nav-link" style={{ fontSize: '0.8cqi' }} onClick={() => window.location.href = '/team'}>TEAM</div>
+                                </div>
+
+                                {/* FAQ Mario block button */}
+                                <button
+                                    onClick={() => {
+                                        if (window.location.pathname === '/') {
+                                            document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
+                                        } else {
+                                            window.location.href = '/#faqs';
+                                        }
+                                    }}
+                                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex' }}
+                                    className="hover-scale"
+                                    aria-label="FAQ"
+                                >
+                                    <img src="/question_mark.png" alt="FAQ" style={{ width: '2.5cqi', height: '2.5cqi', imageRendering: 'pixelated' }} />
+                                </button>
+                            </div>
                         )}
 
                         {/* STATE C & D: Pixel Mario UI */}
                         {(bootState === 'C' || bootState === 'D') && (
-                            <>
-                                <div className="absolute inset-0 w-full h-full pointer-events-none stars-bg opacity-70"></div>
-                                <div className="w-full h-full flex flex-col items-center relative transition-all duration-700">
-
-                                    {/* Navbar */}
-                                    <div className="w-full flex justify-between items-center px-[4cqi] py-[1.5cqi] border-b border-[rgba(135,206,235,0.15)] animate-in fade-in slide-in-from-top-4 duration-700">
-                                        {/* Spacer to keep nav centered */}
-                                        <div style={{ width: '2.5cqi' }}></div>
-                                        <div className="flex items-center gap-[3cqi]">
-                                            <div className="pixel-nav-link active" style={{ fontSize: '0.8cqi', padding: '0.5cqi 0.8cqi' }}>HOME</div>
-                                            <div className="pixel-nav-link" style={{ fontSize: '0.8cqi' }} onClick={() => window.location.href = '/events'}>EVENTS</div>
-                                            <div className="pixel-nav-link" style={{ fontSize: '0.8cqi' }} onClick={() => window.location.href = '/talks'}>TECH TALK</div>
-                                            <div className="pixel-nav-link" style={{ fontSize: '0.8cqi' }} onClick={() => window.location.href = '/gallery'}>GALLERY</div>
-                                            <div className="pixel-nav-link" style={{ fontSize: '0.8cqi' }} onClick={() => window.location.href = '/team'}>TEAM</div>
-                                        </div>
-
-                                        {/* FAQ Mario block button */}
-                                        <button
-                                            onClick={() => {
-                                                if (window.location.pathname === '/') {
-                                                    document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
-                                                } else {
-                                                    window.location.href = '/#faqs';
-                                                }
-                                            }}
-                                            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex' }}
-                                            className="hover-scale"
-                                            aria-label="FAQ"
-                                        >
-                                            <img src="/question_mark.png" alt="FAQ" style={{ width: '2.5cqi', height: '2.5cqi', imageRendering: 'pixelated' }} />
-                                        </button>
-                                    </div>
-
-                                    {/* Floating Images (now with transparent background) */}
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: blackFade ? 0 : 1 }}
+                                transition={{ duration: blackFade ? 0.25 : 1 }}
+                                className="w-full flex-1 flex flex-col items-center relative z-10"
+                            >
+                                {/* Floating Images (now with transparent background) */}
                                     <img src="/pixel_cloud.png" className="absolute top-[8cqi] left-[8cqi] w-[5.5cqi] pixel-cloud" alt="cloud" />
                                     <img src="/pixel_cloud.png" className="absolute top-[10cqi] right-[8cqi] w-[7cqi] pixel-cloud-reverse" alt="cloud" />
 
@@ -669,86 +655,135 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                                             <PixelCountdown />
                                         </div>
                                     </div>
-                                </div>
-                            </>
+                            </motion.div>
                         )}
 
-                        {/* NEXT PROMPT for State D removed */}
-
-                        {/* STATE E: About Content */}
+                        {/* STATE E: About Content (Single Screen Replacement) */}
                         {bootState === 'E' && (
-                            <div className="w-full h-full">
-                                {page === 0 && (
-                                    <div className="w-full h-full flex flex-col justify-center items-start text-left animate-in fade-in duration-300" style={{ padding: '2.4cqi' }}>
-                                        <h2
-                                            className="text-white tracking-wide"
-                                            style={{ fontFamily: "var(--font-mono)", fontSize: "1.5cqi", lineHeight: "1.5", marginBottom: '1.2cqi' }}
-                                        >
-                                            {EVENT.heading}
+                            <div className="w-full flex-1 flex flex-col items-center gap-[1.5cqi] animate-in fade-in duration-300 z-10" style={{ padding: '1.5cqi 2cqi 1cqi 2cqi', transition: 'opacity 0.25s ease', opacity: blackFade ? 0 : 1 }}>
+                                
+                                {/* Outlined Container */}
+                                <div className="w-full flex-1 flex flex-col justify-between border border-gray-700/60 shadow-lg" style={{ borderRadius: '0.8cqi', backgroundColor: 'rgba(17, 24, 39, 0.3)', padding: '1.5cqi 1cqi 0.5cqi 1cqi' }}>
+                                    
+                                    {/* TOP ROW: Text and Island */}
+                                    <div className="w-full flex items-start justify-between flex-1 px-[1cqi]">
+                                    
+                                    {/* Left Column */}
+                                    <div className="flex flex-col justify-start" style={{ width: '50%', paddingRight: '1cqi', paddingTop: '1.5cqi' }}>
+                                        {/* Title */}
+                                        <h2 className="flex items-center tracking-wide" style={{ fontFamily: "var(--font-mono)", fontSize: "1.8cqi", fontWeight: "bold", marginBottom: "3cqi" }}>
+                                            <span style={{ color: '#ef4444', marginRight: '0.8cqi' }}>&gt;&gt;</span>
+                                            <span style={{ color: '#eab308' }}>About the event</span>
                                         </h2>
-
-                                        {EVENT.paragraphs.map((p, i) => (
-                                            <p key={i} className="leading-relaxed text-gray-300 w-full" style={{ fontSize: '1.25cqi', marginBottom: '1.2cqi', fontFamily: 'var(--font-mono)' }}>
-                                                {p}
-                                            </p>
-                                        ))}
-
-                                        <div
-                                            className="flex items-center cursor-pointer hover-scale-nav absolute bottom-[1.2cqi] left-[3.2cqi] gap-[0.5cqi]"
-                                            onClick={() => press('left', handleBack)}
-                                            style={{ color: 'var(--bg)', backgroundColor: 'var(--signature-gold)', border: '1px solid var(--signature-gold)', padding: '0.3cqi 0.8cqi', borderRadius: '4px' }}
-                                        >
-                                            <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.9cqi", marginTop: "0.2cqi" }}>&lt;</span>
-                                            <span className="animate-pulse" style={{ fontSize: '1.1cqi', fontFamily: 'var(--font-mono)' }}>BACK</span>
-                                        </div>
-
-                                        <div
-                                            className="flex items-center cursor-pointer hover-scale-next absolute bottom-[1.2cqi] right-[3.2cqi] gap-[0.5cqi]"
-                                            onClick={() => press('right', handleNext)}
-                                            style={{ color: 'var(--bg)', backgroundColor: 'var(--signature-gold)', border: '1px solid var(--signature-gold)', padding: '0.3cqi 0.8cqi', borderRadius: '4px' }}
-                                        >
-                                            <span className="animate-pulse" style={{ fontSize: '1.1cqi', fontFamily: 'var(--font-mono)' }}>NEXT</span>
-                                            <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.9cqi", marginTop: "0.2cqi" }}>&gt;</span>
-                                        </div>
+                                        
+                                        {/* Paragraphs */}
+                                        <p className="leading-relaxed text-gray-300" style={{ fontSize: '1cqi', marginBottom: '1.2cqi', fontFamily: 'var(--font-mono)' }}>
+                                            TECH ADRISHTA started as a dorm-room hackathon and grew into the largest independent tech fest in the region. Two days, four tracks, and a single rule: everything you present has to actually run.
+                                        </p>
+                                        <p className="leading-relaxed text-gray-300" style={{ fontSize: '1cqi', fontFamily: 'var(--font-mono)' }}>
+                                            Expect engineers who ship at scale, founders mid-raise, and security researchers who break things on stage. No keynote fluff.
+                                        </p>
                                     </div>
-                                )}
+                                    
+                                    {/* Right Column: Island */}
+                                    <div className="flex justify-end items-end relative" style={{ width: '50%', height: '100%', paddingRight: '2cqi' }}>
+                                        <img src="/pixel_cloud.png" className="absolute top-[1cqi] left-[8cqi] w-[5.5cqi] pixel-cloud" style={{ opacity: 0.8 }} alt="cloud" />
+                                        <img src="/pixel_cloud.png" className="absolute top-[-0.5cqi] right-[8cqi] w-[6.5cqi] pixel-cloud-reverse" style={{ opacity: 0.8 }} alt="cloud" />
+                                        <img src="/island.png" alt="Floating Island" style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'relative', zIndex: 10 }} />
+                                    </div>
+                                </div>
 
-                                {page === 1 && (
-                                    <div className="w-full h-full flex flex-col justify-center animate-in fade-in duration-300" style={{ padding: '2.4cqi 3.2cqi 4.2cqi' }}>
-                                        <div className="border border-gray-600 bg-white/5 shadow-lg" style={{ borderRadius: '0.8cqi', padding: '1.6cqi 2.0cqi' }}>
-                                            <div
-                                                className="text-white text-center"
-                                                style={{ fontFamily: "var(--font-mono)", fontSize: "1.35cqi", marginBottom: '1.2cqi' }}
-                                            >
-                                                {EVENT.tracksTitle}
+                                    {/* BOTTOM SECTION */}
+                                    <div className="w-full flex flex-col items-center shrink-0">
+                                        
+                                        {/* Stats Bar */}
+                                        <div className="w-full flex items-center justify-between border-t border-gray-700/60 mt-[1cqi]" style={{ padding: '1cqi 0 0.5cqi 0' }}>
+                                        
+                                        {/* 1. DATE */}
+                                        <div className="flex flex-row items-center justify-center gap-[0.8cqi] w-1/4">
+                                            <span style={{ fontSize: '1.8cqi' }}>📅</span>
+                                            <div className="flex flex-col text-left" style={{ fontFamily: 'var(--font-mono)', lineHeight: '1.2' }}>
+                                                <span style={{ color: '#ef4444', fontSize: '0.8cqi' }}>DATE</span>
+                                                <span style={{ color: '#fff', fontSize: '0.75cqi', letterSpacing: '0.5px' }}>12 - 13<br/>SEPTEMBER 2026</span>
                                             </div>
-                                            <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.9cqi' }}>
-                                                {EVENT.tracks.map((t) => (
-                                                    <li key={t.name} className="leading-snug text-gray-300" style={{ fontSize: '1.1cqi' }}>
-                                                        <span className="text-white font-bold">{t.name}</span> — {t.desc}
-                                                    </li>
-                                                ))}
-                                            </ul>
                                         </div>
 
-                                        <div
-                                            className="flex items-center cursor-pointer hover-scale-nav absolute bottom-[1.2cqi] left-[3.2cqi] gap-[0.5cqi]"
-                                            onClick={() => press('left', handleBack)}
-                                            style={{ color: 'var(--bg)', backgroundColor: 'var(--signature-gold)', border: '1px solid var(--signature-gold)', padding: '0.3cqi 0.8cqi', borderRadius: '4px' }}
-                                        >
-                                            <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.9cqi", marginTop: "0.2cqi" }}>&lt;</span>
-                                            <span className="animate-pulse" style={{ fontSize: '1.1cqi', fontFamily: 'var(--font-mono)' }}>BACK</span>
+                                        <div className="w-[1px] h-[3cqi] border-l border-dashed border-gray-600/50"></div>
+                                        
+                                        {/* 2. VENUE */}
+                                        <div className="flex flex-row items-center justify-center gap-[0.8cqi] w-1/4">
+                                            <span style={{ fontSize: '1.8cqi' }}>📍</span>
+                                            <div className="flex flex-col text-left" style={{ fontFamily: 'var(--font-mono)', lineHeight: '1.2' }}>
+                                                <span style={{ color: '#ef4444', fontSize: '0.8cqi' }}>VENUE</span>
+                                                <span style={{ color: '#fff', fontSize: '0.75cqi', letterSpacing: '0.5px' }}>SMIT CAMPUS,<br/>SIKKIM</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="w-[1px] h-[3cqi] border-l border-dashed border-gray-600/50"></div>
+                                        
+                                        {/* 3. PARTICIPANTS */}
+                                        <div className="flex flex-row items-center justify-center gap-[0.8cqi] w-1/4">
+                                            <span style={{ fontSize: '1.8cqi' }}>👥</span>
+                                            <div className="flex flex-col text-left" style={{ fontFamily: 'var(--font-mono)', lineHeight: '1.2' }}>
+                                                <span style={{ color: '#ef4444', fontSize: '0.8cqi' }}>PARTICIPANTS</span>
+                                                <span style={{ color: '#fff', fontSize: '0.75cqi', letterSpacing: '0.5px' }}>1000+<br/>INNOVATORS</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="w-[1px] h-[3cqi] border-l border-dashed border-gray-600/50"></div>
+                                        
+                                        {/* 4. DURATION */}
+                                        <div className="flex flex-row items-center justify-center gap-[0.8cqi] w-1/4">
+                                            <span style={{ fontSize: '1.8cqi' }}>⏱️</span>
+                                            <div className="flex flex-col text-left" style={{ fontFamily: 'var(--font-mono)', lineHeight: '1.2' }}>
+                                                <span style={{ color: '#ef4444', fontSize: '0.8cqi' }}>DURATION</span>
+                                                <span style={{ color: '#fff', fontSize: '0.75cqi', letterSpacing: '0.5px' }}>2 DAYS</span>
+                                            </div>
                                         </div>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                                </div> {/* End of Outlined Container */}
+
+                                    {/* Buttons Row */}
+                                    <div className="flex items-center gap-[3cqi]" style={{ marginTop: '0.5cqi' }}>
+                                        <button className="hover:scale-105 transition-transform flex items-center justify-center" 
+                                            onClick={() => window.location.href = '/events'}
+                                            style={{ 
+                                                backgroundColor: '#ffb800', 
+                                                color: '#000',
+                                                border: 'none',
+                                                padding: '1.2cqi 2.5cqi',
+                                                margin: '6px',
+                                                fontFamily: 'var(--font-mono)',
+                                                fontWeight: 'bold',
+                                                fontSize: '1cqi',
+                                                boxShadow: 'inset 0 -3px 0 0 rgba(217, 119, 6, 0.5), 0 -3px 0 0 #000, 0 3px 0 0 #000, -3px 0 0 0 #000, 3px 0 0 0 #000, 0 -6px 0 0 #d97706, 0 6px 0 0 #d97706, -6px 0 0 0 #d97706, 6px 0 0 0 #d97706, -3px -3px 0 0 #d97706, 3px -3px 0 0 #d97706, -3px 3px 0 0 #d97706, 3px 3px 0 0 #d97706'
+                                            }}>
+                                            REGISTER NOW &gt;
+                                        </button>
+                                        <button className="hover:scale-105 transition-transform flex items-center justify-center" 
+                                            onClick={() => window.location.href = '/events'}
+                                            style={{ 
+                                                backgroundColor: 'rgba(0,0,0,0.6)',
+                                                color: '#fff',
+                                                border: 'none',
+                                                padding: '1.2cqi 2.5cqi',
+                                                margin: '6px',
+                                                fontFamily: 'var(--font-mono)',
+                                                fontSize: '1cqi',
+                                                boxShadow: '0 -3px 0 0 #9ca3af, 0 3px 0 0 #9ca3af, -3px 0 0 0 #9ca3af, 3px 0 0 0 #9ca3af'
+                                            }}>
+                                            VIEW SCHEDULE
+                                        </button>
+                                    </div>
+                                </div>
                         )}
                     </div>
                 </div>
 
                 {/* ================= SCREEN GLARE OVERLAY ================= */}
                 <svg viewBox="0 0 1000 480" className="absolute inset-0 w-full h-full pointer-events-none" style={{ display: 'block' }}>
-                    <rect x="215" y="46" width="570" height="388" rx="20" fill="url(#screenGlare)" pointerEvents="none" />
+                    <rect x="125" y="30" width="750" height="420" rx="10" fill="url(#screenGlare)" pointerEvents="none" />
                 </svg>
             </div>
 

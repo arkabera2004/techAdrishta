@@ -1,11 +1,12 @@
 // src/pages/Home.jsx
 import { useState, useRef, useEffect } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue } from 'framer-motion';
+import { Link, useOutletContext, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, animate } from 'framer-motion';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 import SwitchRulesCard from '../components/SwitchRulesCard';
 import TedTalk from '../components/TedTalk';
 import FaqSection from '../components/FaqSection';
+import RegisterSection from '../components/RegisterSection';
 import bgMusicFile from '../../public/audiotrack.mp3';
 
 import FlipClock from '../components/FlipClock';
@@ -124,6 +125,7 @@ export default function Home() {
 
   const [bootState, setBootState] = useState('A');
   const [mobileStartClicked, setMobileStartClicked] = useState(false);
+  const [isAutoZooming, setIsAutoZooming] = useState(false);
 
   const showHeroDetails = bootState === 'D' || bootState === 'E';
   const showMobileStart = bootState === 'D' && !mobileStartClicked;
@@ -131,7 +133,7 @@ export default function Home() {
   // 1. Scroll Prevention During Boot
   useEffect(() => {
     // Only allow scrolling once bootState has reached at least C
-    if (bootState === 'C' || bootState === 'D' || bootState === 'E' || bootState === 'F' || bootState === 'FAQ' || bootState === 'G') {
+    if (bootState === 'C' || bootState === 'D' || bootState === 'E' || bootState === 'F' || bootState === 'FAQ' || bootState === 'REGISTER' || bootState === 'G') {
       document.body.style.overflow = '';
     } else {
       document.body.style.overflow = 'hidden';
@@ -141,6 +143,61 @@ export default function Home() {
 
   // 2. Setup Sticky Scroll Container
   const heroWrapperRef = useRef(null);
+  const autoZoomTargetRef = useRef(null);
+
+  const handleRegisterAutoZoom = () => {
+    const vh = window.innerHeight;
+    const zoomScrollTarget = 2 * vh; 
+    
+    if (window.scrollY < zoomScrollTarget) {
+      setIsAutoZooming(true);
+      
+      // Also intercept wheel and touchmove events strictly during this time
+      const preventScroll = (e) => e.preventDefault();
+      window.addEventListener('wheel', preventScroll, { passive: false });
+      window.addEventListener('touchmove', preventScroll, { passive: false });
+      document.body.style.pointerEvents = 'none';
+      
+      animate(window.scrollY, zoomScrollTarget, {
+        duration: 1,
+        ease: "easeInOut",
+        onUpdate: (latest) => window.scrollTo(0, latest),
+        onComplete: () => {
+          setTimeout(() => {
+            if (autoZoomTargetRef.current) {
+              autoZoomTargetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            setIsAutoZooming(false);
+            window.removeEventListener('wheel', preventScroll);
+            window.removeEventListener('touchmove', preventScroll);
+            document.body.style.pointerEvents = '';
+          }, 100);
+        }
+      });
+    } else {
+      if (autoZoomTargetRef.current) {
+        autoZoomTargetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleTrigger = () => handleRegisterAutoZoom();
+    window.addEventListener('triggerRegisterAutoZoom', handleTrigger);
+    return () => window.removeEventListener('triggerRegisterAutoZoom', handleTrigger);
+  }, []);
+
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.triggerAutoZoom) {
+      // Clear state so it doesn't re-trigger on refresh
+      window.history.replaceState({}, document.title);
+      // Wait a tick for render
+      setTimeout(() => {
+        handleRegisterAutoZoom();
+      }, 100);
+    }
+  }, [location.state]);
 
   const zoomTrackerRef = useRef(null);
   const { scrollYProgress: zoomProgress } = useScroll({
@@ -263,6 +320,8 @@ export default function Home() {
                 scrollYProgress={zoomProgress}
                 contentY={contentY}
                 onContentHeightChange={setContentHeight}
+                onRegisterClick={handleRegisterAutoZoom}
+                isAutoZooming={isAutoZooming}
               >
                  {({ scrollRef, isScrolling, bootState, nintendoIndex, blackFade, screenHeight, navbarHeight }) => {
                      if (!innerScrollRef && scrollRef.current) {
@@ -282,8 +341,8 @@ export default function Home() {
           zIndex: 10,
           backgroundColor: !isScrolling ? 'transparent' : 'var(--bg)',
           paddingTop: !isScrolling ? (navbarHeight || 0) : '2rem',
-          opacity: !isScrolling ? (bootState === 'F' || bootState === 'FAQ' || bootState === 'G' ? 1 : 0) : 1,
-          pointerEvents: !isScrolling ? (bootState === 'F' || bootState === 'FAQ' || bootState === 'G' ? 'auto' : 'none') : 'auto',
+          opacity: !isScrolling ? (bootState === 'F' || bootState === 'FAQ' || bootState === 'REGISTER' || bootState === 'G' ? 1 : 0) : 1,
+          pointerEvents: !isScrolling ? (bootState === 'F' || bootState === 'FAQ' || bootState === 'REGISTER' || bootState === 'G' ? 'auto' : 'none') : 'auto',
           transition: 'opacity 0.5s ease',
         }}
       >
@@ -293,6 +352,9 @@ export default function Home() {
 
         {/* ─── FAQ SECTION (FAQ) ─── */}
         <FaqSection isVisible={bootState === 'FAQ' || isScrolling} opacity={!isScrolling && bootState !== 'FAQ' ? 0 : 1} isScrolling={isScrolling} blackFade={blackFade} screenHeight={screenHeight} navbarHeight={navbarHeight} />
+
+        {/* ─── REGISTER SECTION (REGISTER) ─── */}
+        <RegisterSection isVisible={bootState === 'REGISTER' || isScrolling} opacity={!isScrolling && bootState !== 'REGISTER' ? 0 : 1} isScrolling={isScrolling} blackFade={blackFade} screenHeight={screenHeight} navbarHeight={navbarHeight} autoZoomRef={autoZoomTargetRef} />
 
         <div style={!isScrolling ? { margin: 0, padding: 0 } : styles.contentWrap}>
 

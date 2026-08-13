@@ -61,7 +61,13 @@ export default function Header() {
 
 
         <Link
-          to="/register"
+          to={isHome ? "#" : "/register"}
+          onClick={(e) => {
+            if (isHome) {
+              e.preventDefault();
+              window.dispatchEvent(new Event('triggerRegisterAutoZoom'));
+            }
+          }}
           style={styles.topRightBtn}
           className="desktop-only hover-scale"
         >

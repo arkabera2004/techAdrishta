@@ -129,12 +129,16 @@ export default function TicketCard({ event, tilt = 0 }) {
     navigate(`/register?event=${event.id}`);
   }, [event.id, navigate]);
 
-  function handleRegister() {
+  function handleRegister(e) {
+    if (e) e.stopPropagation();
     if (isSoldOut) return;
-    playTearSound();
-    if (reduced) { go(); return; }
-    if (!cardRef.current || isTearing) return;
-    setIsTearing(true);
+    
+    // Auto zoom animation on Home page instead of tear animation
+    if (location.pathname === '/') {
+        window.dispatchEvent(new Event('triggerRegisterAutoZoom'));
+    } else {
+        navigate('/', { state: { triggerAutoZoom: true, preselectEvent: event.id } });
+    }
   }
 
   /* ─── Imperative tear animation (runs once isTearing = true) ─── */

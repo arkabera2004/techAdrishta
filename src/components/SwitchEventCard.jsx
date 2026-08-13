@@ -39,7 +39,7 @@ function useGoogleFonts() {
     }, []);
 }
 
-export default function SwitchEventCard({ children, forceStateE = false, isZoomingOut = true, onStateE = () => { }, onBootStateChange = () => { }, scrollYProgress, contentY, onContentHeightChange }) {
+export default function SwitchEventCard({ children, forceStateE = false, isZoomingOut = true, onStateE = () => { }, onBootStateChange = () => { }, scrollYProgress, contentY, onContentHeightChange, onRegisterClick, isAutoZooming }) {
     const navigate = useNavigate();
     const location = useLocation();
     useGoogleFonts();
@@ -164,6 +164,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
     };
 
     const press = (id, action) => {
+        if (isAutoZooming) return;
         playSound();
         setPressed(id);
         action?.();
@@ -189,7 +190,13 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                 setBootState('FAQ');
                 setBlackFade(false);
             }, 300);
-        } else if ((bootState === 'E' || bootState === 'F' || bootState === 'FAQ' || bootState === 'G') && scrollRef.current) {
+        } else if (bootState === 'FAQ' && !isScrolling) {
+            setBlackFade(true);
+            setTimeout(() => {
+                setBootState('REGISTER');
+                setBlackFade(false);
+            }, 300);
+        } else if ((bootState === 'E' || bootState === 'F' || bootState === 'FAQ' || bootState === 'REGISTER' || bootState === 'G') && scrollRef.current) {
             scrollRef.current.scrollBy({ top: scrollRef.current.clientHeight, behavior: "smooth" });
         }
     };
@@ -211,6 +218,12 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
             setBlackFade(true);
             setTimeout(() => {
                 setBootState('F');
+                setBlackFade(false);
+            }, 300);
+        } else if (bootState === 'REGISTER' && !isScrolling) {
+            setBlackFade(true);
+            setTimeout(() => {
+                setBootState('FAQ');
                 setBlackFade(false);
             }, 300);
         } else if (scrollRef.current && scrollRef.current.scrollTop > 50) {
@@ -747,7 +760,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                                             <p>all under one roof.</p>
                                         </div>
 
-                                        <button className="pixel-btn" style={{ marginTop: '1.5cqi', marginBottom: '1.5cqi' }} onClick={() => window.location.href = '/events'}>
+                                        <button className="pixel-btn" style={{ marginTop: '1.5cqi', marginBottom: '1.5cqi' }} onClick={(e) => { e.preventDefault(); if(onRegisterClick) onRegisterClick(); }}>
                                             REGISTER NOW <span style={{ fontFamily: 'sans-serif', fontWeight: 'bold' }}>&gt;</span>
                                         </button>
 
@@ -847,7 +860,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                                     {/* Buttons Row */}
                                     <div className="flex items-center gap-[3cqi]" style={{ marginTop: '0.5cqi' }}>
                                         <button className="hover:scale-105 transition-transform flex items-center justify-center" 
-                                            onClick={() => window.location.href = '/events'}
+                                            onClick={(e) => { e.preventDefault(); if(onRegisterClick) onRegisterClick(); else window.location.href = '/events'; }}
                                             style={{ 
                                                 backgroundColor: '#ffb800', 
                                                 color: '#000',

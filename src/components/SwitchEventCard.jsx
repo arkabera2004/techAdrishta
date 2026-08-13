@@ -3,6 +3,7 @@ import Wordmark from "./Wordmark";
 import { motion, useTransform, useMotionValue } from "framer-motion";
 import FlipClock from "./FlipClock";
 import PixelCountdown from "./PixelCountdown";
+import { useNavigate, useLocation } from "react-router-dom";
 
 /**
  * SwitchEventCard
@@ -38,13 +39,38 @@ function useGoogleFonts() {
     }, []);
 }
 
-export default function SwitchEventCard({ forceStateE = false, isZoomingOut = true, onStateE = () => { }, onBootStateChange = () => { }, scrollYProgress }) {
+export default function SwitchEventCard({ children, forceStateE = false, isZoomingOut = true, onStateE = () => { }, onBootStateChange = () => { }, scrollYProgress, contentY, onContentHeightChange }) {
+    const navigate = useNavigate();
+    const location = useLocation();
     useGoogleFonts();
     const scrollRef = useRef(null);
-    const [pressed, setPressed] = useState(null);
-
+    
     const fallbackScroll = useMotionValue(0);
     const effectiveScroll = scrollYProgress || fallbackScroll;
+
+    const [pressed, setPressed] = useState(null);
+    const [isScrolling, setIsScrolling] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (scrollRef.current) setScreenHeight(scrollRef.current.clientHeight);
+            // We can't easily query navbar here without a ref, but it scales proportionally so updating screenHeight is good enough.
+            // Actually, let's just trigger a re-render and let the refs update it.
+            setScreenHeight(0);
+            setNavbarHeight(0);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const [screenHeight, setScreenHeight] = useState(0);
+    const [navbarHeight, setNavbarHeight] = useState(0);
+
+    useEffect(() => {
+        return effectiveScroll.onChange(v => {
+            setIsScrolling(v >= 0.99);
+        });
+    }, [effectiveScroll]);
 
     const [maxScale, setMaxScale] = useState(1.35);
 
@@ -131,10 +157,6 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
         onBootStateChange(bootState);
     }, [bootState, onStateE, onBootStateChange]);
 
-    const scrollBy = (amount) => {
-        scrollRef.current?.scrollBy({ top: amount, behavior: "smooth" });
-    };
-
     const playSound = () => {
         const audio = new Audio('/button.mp3');
         audio.play().catch(e => console.log('Audio play failed:', e));
@@ -154,36 +176,38 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                 setBootState('E');
                 setBlackFade(false);
             }, 300);
+        } else if (bootState === 'E' && scrollRef.current) {
+            scrollRef.current.scrollBy({ top: scrollRef.current.clientHeight, behavior: "smooth" });
         }
     };
 
     const handleUp = () => {
         if (bootState === 'E') {
-            setBlackFade(true);
-            setTimeout(() => {
-                setBootState('D');
-                setBlackFade(false);
-            }, 300);
+            if (scrollRef.current && scrollRef.current.scrollTop > 50) {
+                scrollRef.current.scrollBy({ top: -scrollRef.current.clientHeight, behavior: "smooth" });
+            } else {
+                setBlackFade(true);
+                setTimeout(() => {
+                    setBootState('D');
+                    setBlackFade(false);
+                }, 300);
+            }
         }
     };
 
     const navRoutes = ['/', '/events', '/talks', '/gallery', '/team'];
 
     const handleRight = () => {
-        const currentIdx = navRoutes.indexOf(window.location.pathname);
+        const currentIdx = navRoutes.indexOf(location.pathname);
         if (currentIdx !== -1 && currentIdx < navRoutes.length - 1) {
-            window.location.href = navRoutes[currentIdx + 1];
-        } else {
-            window.location.href = navRoutes[0];
+            navigate(navRoutes[currentIdx + 1]);
         }
     };
 
     const handleLeft = () => {
-        const currentIdx = navRoutes.indexOf(window.location.pathname);
+        const currentIdx = navRoutes.indexOf(location.pathname);
         if (currentIdx > 0) {
-            window.location.href = navRoutes[currentIdx - 1];
-        } else {
-            window.location.href = navRoutes[navRoutes.length - 1];
+            navigate(navRoutes[currentIdx - 1]);
         }
     };
 
@@ -574,7 +598,7 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
 
                 {/* ================= SCREEN HTML OVERLAY ================= */}
                 <div
-                    className="absolute z-10"
+                    className="absolute z-10 pointer-events-auto"
                     style={{
                         left: '12.5%',     /* 125 / 1000 */
                         top: '6.25%',      /* 30 / 480 */
@@ -586,20 +610,27 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                     }}
                 >
                     <div
-                        ref={scrollRef}
-                        className="switch-screen-scroll w-full h-full overflow-hidden flex flex-col relative"
+                        ref={el => {
+                            if (el) {
+                                scrollRef.current = el;
+                                if (screenHeight === 0) setScreenHeight(el.clientHeight);
+                            }
+                        }}
+                        className={`switch-screen-scroll w-full h-full relative overflow-hidden`}
                         style={{ backgroundColor: '#060a14' }}
                     >
                         {/* STATE A is empty screen before boot */}
 
                         {/* Shared Background for C, D, E */}
-                        {(bootState === 'C' || bootState === 'D' || bootState === 'E') && (
+                        {(bootState === 'C' || bootState === 'D' || bootState === 'E' || isScrolling) && (
                             <div className="absolute inset-0 w-full h-full pointer-events-none stars-bg opacity-70 z-0"></div>
                         )}
 
                         {/* Shared Navbar for C, D, E */}
-                        {(bootState === 'C' || bootState === 'D' || bootState === 'E') && (
-                            <div className="w-full flex justify-between items-center px-[4cqi] py-[1.5cqi] border-b border-[rgba(135,206,235,0.15)] animate-in fade-in slide-in-from-top-4 duration-700 relative z-20">
+                        {(bootState === 'C' || bootState === 'D' || bootState === 'E' || isScrolling) && (
+                            <div 
+                                ref={el => { if (el && navbarHeight === 0) setNavbarHeight(el.clientHeight); }}
+                                className="w-full flex justify-between items-center px-[4cqi] py-[1.5cqi] border-b border-[rgba(135,206,235,0.15)] animate-in fade-in slide-in-from-top-4 duration-700 relative z-20">
                                 {/* Spacer to keep nav centered */}
                                 <div style={{ width: '2.5cqi' }}></div>
                                 <div className="flex items-center gap-[3cqi]">
@@ -628,13 +659,25 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                             </div>
                         )}
 
+                        <motion.div 
+                            style={{ y: contentY, width: '100%', display: 'flex', flexDirection: 'column' }}
+                            ref={el => {
+                                if (el && onContentHeightChange && !el.dataset.observed) {
+                                    el.dataset.observed = 'true';
+                                    const obs = new ResizeObserver(entries => {
+                                        onContentHeightChange(entries[0].contentRect.height);
+                                    });
+                                    obs.observe(el);
+                                }
+                            }}
+                        >
                         {/* STATE C & D: Pixel Mario UI */}
-                        {(bootState === 'C' || bootState === 'D') && (
+                        {(bootState === 'C' || bootState === 'D' || isScrolling) && (
                             <motion.div 
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: blackFade ? 0 : 1 }}
                                 transition={{ duration: blackFade ? 0.25 : 1 }}
-                                className="w-full flex-1 flex flex-col items-center relative z-10"
+                                className="w-full flex-shrink-0 flex flex-col items-center relative z-10" style={{ height: screenHeight && navbarHeight ? `${screenHeight - navbarHeight}px` : "36.7cqi" }}
                             >
                                 {/* Floating Images (now with transparent background) */}
                                     <img src="/pixel_cloud.png" className="absolute top-[8cqi] left-[8cqi] w-[5.5cqi] pixel-cloud" alt="cloud" />
@@ -692,8 +735,8 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                         )}
 
                         {/* STATE E: About Content (Single Screen Replacement) */}
-                        {bootState === 'E' && (
-                            <div className="w-full flex-1 flex flex-col items-center gap-[1.5cqi] animate-in fade-in duration-300 z-10" style={{ padding: '1.5cqi 2cqi 1cqi 2cqi', transition: 'opacity 0.25s ease', opacity: blackFade ? 0 : 1 }}>
+                        {(bootState === 'E' || isScrolling) && (
+                            <div className="w-full flex-shrink-0 flex flex-col items-center gap-[1.5cqi] animate-in fade-in duration-300 z-10" style={{ height: screenHeight && navbarHeight ? `${screenHeight - navbarHeight}px` : "36.7cqi", padding: '1.5cqi 2cqi 1cqi 2cqi', transition: 'opacity 0.25s ease', opacity: blackFade ? 0 : 1 }}>
                                 
                                 {/* Outlined Container */}
                                 <div className="w-full flex-1 flex flex-col justify-between border border-gray-700/60 shadow-lg" style={{ borderRadius: '0.8cqi', backgroundColor: 'rgba(17, 24, 39, 0.3)', padding: '1.5cqi 1cqi 0.5cqi 1cqi' }}>
@@ -810,9 +853,13 @@ export default function SwitchEventCard({ forceStateE = false, isZoomingOut = tr
                                         </button>
                                     </div>
                                 </div>
-                        )}
+                            )}
+                            
+                            {/* Dynamic Children Content (Featured Tickets, Speakers, Schedule, etc.) */}
+                            {typeof children === 'function' ? children(scrollRef) : children}
+                        </motion.div>
+                        </div>
                     </div>
-                </div>
 
                 {/* ================= SCREEN GLARE OVERLAY ================= */}
                 <svg viewBox="0 0 1000 480" className="absolute inset-0 w-full h-full pointer-events-none" style={{ display: 'block' }}>

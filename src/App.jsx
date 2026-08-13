@@ -57,7 +57,7 @@ export default function App() {
       </div>
       
       <div ref={footerRef} style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: -1, backgroundColor: "#000" }}>
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </>
   );

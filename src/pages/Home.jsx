@@ -55,11 +55,12 @@ const staggerContainer = {
 };
 
 /* ─── Helper Component for Sticky Tickets ─── */
-function StickyTicket({ event, index, baseTilt }) {
+function StickyTicket({ event, index, baseTilt, scrollContainerRef }) {
   const ref = useRef(null);
 
   const { scrollYProgress } = useScroll({
     target: ref,
+    container: scrollContainerRef,
     offset: ["start end", `start ${160 + index * 24}px`]
   });
 
@@ -90,6 +91,21 @@ export default function Home() {
   const bootSequenceTriggered = context?.bootSequenceTriggered ?? true;
   const [schedDay, setSchedDay] = useState('day1');
   const [openFaq, setOpenFaq] = useState(null);
+  const [innerScrollRef, setInnerScrollRef] = useState(null);
+
+  const [contentHeight, setContentHeight] = useState(0);
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    // ResizeObserver moved to SwitchEventCard
+  }, []);
+
+  const { scrollY } = useScroll();
+  const [vh2, setVh2] = useState(2000);
+  useEffect(() => { setVh2(window.innerHeight * 2); }, []);
+  const contentY = useTransform(scrollY, [vh2, vh2 + contentHeight], [0, -contentHeight]);
+
 
   const [bootState, setBootState] = useState('A');
   const [mobileStartClicked, setMobileStartClicked] = useState(false);
@@ -110,6 +126,13 @@ export default function Home() {
 
   // 2. Setup Sticky Scroll Container
   const heroWrapperRef = useRef(null);
+
+  const zoomTrackerRef = useRef(null);
+  const { scrollYProgress: zoomProgress } = useScroll({
+    target: zoomTrackerRef,
+    offset: ["start start", "end end"]
+  });
+
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroWrapperRef,
     offset: ["start start", "end end"]
@@ -118,6 +141,7 @@ export default function Home() {
   const panelARef = useRef(null);
   const { scrollYProgress: panelAProgress } = useScroll({
     target: panelARef,
+    container: innerScrollRef,
     offset: ["start end", "start top"]
   });
   const heroScale = useTransform(panelAProgress, [0, 1], [1, 0.97]);
@@ -127,6 +151,7 @@ export default function Home() {
   const panelBRef = useRef(null);
   const { scrollYProgress: panelBProgress } = useScroll({
     target: panelBRef,
+    container: innerScrollRef,
     offset: ["start end", "start top"]
   });
   const speakerScale = useTransform(panelBProgress, [0, 1], [1, 0.97]);
@@ -186,7 +211,8 @@ export default function Home() {
   return (
     <main style={{ backgroundColor: '#000', paddingTop: 0 }}>
       {/* ─── NEW HERO ─── */}
-      <section ref={heroWrapperRef} style={{ height: '300vh', position: 'relative', zIndex: 20 }}>
+            <section ref={heroWrapperRef} style={{ height: `calc(300vh + ${contentHeight}px)`, position: 'relative', zIndex: 20 }}>
+        <div ref={zoomTrackerRef} style={{ position: 'absolute', top: 0, height: '300vh', width: '100%', pointerEvents: 'none' }} />
           <div style={{ 
               position: 'sticky',
               top: 0,
@@ -219,46 +245,17 @@ export default function Home() {
               <SwitchEventCard 
                 onBootStateChange={setBootState} 
                 isZoomingOut={bootSequenceTriggered} 
-                scrollYProgress={heroProgress}
-              />
-          </div>
-
-          <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
-
-
-
-          </div>
-
-          {/* Scroll Cue */}
-          <AnimatePresence>
-              {(bootState === 'D' || bootState === 'E') && (
-                  <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5, duration: 1 }}
-                      style={{
-                          position: 'absolute',
-                          bottom: '2rem',
-                          color: 'var(--signature-gold)',
-                          animation: 'bounce 2s infinite'
-                      }}
-                  >
-                      <ChevronDown size={32} />
-                  </motion.div>
-              )}
-          </AnimatePresence>
-          
-          <style>{`
-              @keyframes bounce {
-                  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-                  40% { transform: translateY(-10px); }
-                  60% { transform: translateY(-5px); }
-              }
-          `}</style>
-          </div>
-      </section>
-
-      {/* ─── PANEL A (Foreground Layer) ─── */}
+                scrollYProgress={zoomProgress}
+                contentY={contentY}
+                onContentHeightChange={setContentHeight}
+              >
+                 {(scrollRef) => {
+                     if (!innerScrollRef && scrollRef.current) {
+                         setTimeout(() => setInnerScrollRef(scrollRef.current), 0);
+                     }
+                     return (
+                         <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+{/* ─── PANEL A (Foreground Layer) ─── */}
       <section
         ref={panelARef}
         style={{
@@ -296,7 +293,7 @@ export default function Home() {
             <div style={{ paddingBottom: '2.5rem', paddingTop: '2rem' }}>
               <div style={{ display: 'flex', width: '100%', flexDirection: 'column', gap: '5rem' }}>
                 {featuredEvents.map((ev, i) => (
-                  <StickyTicket key={ev.id} event={ev} index={i} baseTilt={ev.tilt ?? 0} />
+                  <StickyTicket key={ev.id} event={ev} index={i} baseTilt={ev.tilt ?? 0} scrollContainerRef={innerScrollRef} />
                 ))}
               </div>
             </div>
@@ -305,7 +302,7 @@ export default function Home() {
       </section>
 
       {/* ─── SPEAKERS (Sticky Layer) ─── */}
-      <section style={{ position: 'sticky', top: 0, minHeight: '100dvh', zIndex: 0, display: 'flex', flexDirection: 'column', backgroundColor: '#000', marginTop: '-100vh', marginBottom: '100vh' }}>
+      <section style={{ position: 'relative', minHeight: '100dvh', zIndex: 0, display: 'flex', flexDirection: 'column', backgroundColor: '#000' }}>
         <motion.div style={{ scale: speakerScale, opacity: speakerOpacity, y: speakerY, flex: 1, display: 'flex', flexDirection: 'column', transformOrigin: 'center top' }}>
           <section style={{
             position: 'relative',
@@ -589,6 +586,48 @@ export default function Home() {
           </section>
         </div>
       </section>
+                         </div>
+                     );
+                 }}
+              </SwitchEventCard>
+          </div>
+
+          <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
+
+
+
+          </div>
+
+          {/* Scroll Cue */}
+          <AnimatePresence>
+              {(bootState === 'D' || bootState === 'E') && (
+                  <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5, duration: 1 }}
+                      style={{
+                          position: 'absolute',
+                          bottom: '2rem',
+                          color: 'var(--signature-gold)',
+                          animation: 'bounce 2s infinite'
+                      }}
+                  >
+                      <ChevronDown size={32} />
+                  </motion.div>
+              )}
+          </AnimatePresence>
+          
+          <style>{`
+              @keyframes bounce {
+                  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+                  40% { transform: translateY(-10px); }
+                  60% { transform: translateY(-5px); }
+              }
+          `}</style>
+          </div>
+      </section>
+
+      
     </main>
   );
 }

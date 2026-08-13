@@ -18,6 +18,7 @@ import { schedule, scheduleColors } from '../data/schedule';
 import { RevealText, RevealBreath, StaggerGroup, StaggerItem } from '../components/animations/Reveal';
 import SwitchEventCard from '../components/SwitchEventCard.jsx';
 import TimelineSchedule from '../components/TimelineSchedule.jsx';
+import TedTalk from '../components/TedTalk.jsx';
 
 /* ─── Constants & Data ─── */
 const SPONSORS = ["HP", "DELL", "GOOGLE", "COCO COLA", "REDBULL", "JAVA"];
@@ -127,7 +128,7 @@ export default function Home() {
   // 1. Scroll Prevention During Boot
   useEffect(() => {
     // Only allow scrolling once bootState has reached at least C
-    if (bootState === 'C' || bootState === 'D' || bootState === 'E') {
+    if (bootState === 'C' || bootState === 'D' || bootState === 'E' || bootState === 'F' || bootState === 'G') {
       document.body.style.overflow = '';
     } else {
       document.body.style.overflow = 'hidden';
@@ -260,7 +261,7 @@ export default function Home() {
                 contentY={contentY}
                 onContentHeightChange={setContentHeight}
               >
-                 {({ scrollRef, isScrolling, bootState, nintendoIndex }) => {
+                 {({ scrollRef, isScrolling, bootState, nintendoIndex, blackFade, screenHeight, navbarHeight }) => {
                      if (!innerScrollRef && scrollRef.current) {
                          setTimeout(() => setInnerScrollRef(scrollRef.current), 0);
                      }
@@ -278,15 +279,18 @@ export default function Home() {
           zIndex: 10,
           backgroundColor: !isScrolling ? 'transparent' : 'var(--bg)',
           paddingTop: !isScrolling ? 0 : '2rem',
-          opacity: !isScrolling ? (bootState === 'F' ? 1 : 0) : 1,
-          pointerEvents: !isScrolling ? (bootState === 'F' ? 'auto' : 'none') : 'auto',
+          opacity: !isScrolling ? (bootState === 'F' || bootState === 'G' ? 1 : 0) : 1,
+          pointerEvents: !isScrolling ? (bootState === 'F' || bootState === 'G' ? 'auto' : 'none') : 'auto',
           transition: 'opacity 0.5s ease',
         }}
       >
 
         <div style={!isScrolling ? { margin: 0, padding: 0 } : styles.contentWrap}>
-          {/* ─── FEATURED TICKETS ─── */}
-          <section>
+          {/* ─── TED TALK (F) ─── */}
+          <TedTalk isVisible={bootState === 'F' || isScrolling} opacity={!isScrolling && bootState !== 'F' ? 0 : 1} blackFade={blackFade} screenHeight={screenHeight} navbarHeight={navbarHeight} />
+
+          {/* ─── FEATURED TICKETS (G) ─── */}
+          <section style={{ display: !isScrolling && bootState !== 'G' ? 'none' : 'block', opacity: !isScrolling && bootState !== 'G' ? 0 : 1, transition: 'opacity 0.25s' }}>
             <div style={{
               ...styles.sectionHeader,
               display: !isScrolling ? 'none' : 'flex',

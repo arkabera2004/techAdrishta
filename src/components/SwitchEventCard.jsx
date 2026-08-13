@@ -177,22 +177,34 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                 setBootState('E');
                 setBlackFade(false);
             }, 300);
-        } else if (bootState === 'E' && scrollRef.current) {
+        } else if (bootState === 'E' && !isScrolling) {
+            setBlackFade(true);
+            setTimeout(() => {
+                setBootState('F');
+                setBlackFade(false);
+            }, 300);
+        } else if (bootState === 'F' && scrollRef.current) {
+            scrollRef.current.scrollBy({ top: scrollRef.current.clientHeight, behavior: "smooth" });
+        } else if ((bootState === 'E' || bootState === 'F' || bootState === 'G') && scrollRef.current) {
             scrollRef.current.scrollBy({ top: scrollRef.current.clientHeight, behavior: "smooth" });
         }
     };
 
     const handleUp = () => {
-        if (bootState === 'E') {
-            if (scrollRef.current && scrollRef.current.scrollTop > 50) {
-                scrollRef.current.scrollBy({ top: -scrollRef.current.clientHeight, behavior: "smooth" });
-            } else {
-                setBlackFade(true);
-                setTimeout(() => {
-                    setBootState('D');
-                    setBlackFade(false);
-                }, 300);
-            }
+        if (bootState === 'E' && !isScrolling) {
+            setBlackFade(true);
+            setTimeout(() => {
+                setBootState('D');
+                setBlackFade(false);
+            }, 300);
+        } else if (bootState === 'F' && !isScrolling) {
+            setBlackFade(true);
+            setTimeout(() => {
+                setBootState('E');
+                setBlackFade(false);
+            }, 300);
+        } else if (scrollRef.current && scrollRef.current.scrollTop > 50) {
+            scrollRef.current.scrollBy({ top: -scrollRef.current.clientHeight, behavior: "smooth" });
         }
     };
 
@@ -622,13 +634,13 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                     >
                         {/* STATE A is empty screen before boot */}
 
-                        {/* Shared Background for C, D, E */}
-                        {(bootState === 'C' || bootState === 'D' || bootState === 'E' || isScrolling) && (
+                        {/* Shared Background for C, D, E, F */}
+                        {(bootState === 'C' || bootState === 'D' || bootState === 'E' || bootState === 'F' || isScrolling) && (
                             <div className="absolute inset-0 w-full h-full pointer-events-none stars-bg opacity-70 z-0"></div>
                         )}
 
-                        {/* Shared Navbar for C, D, E */}
-                        {(bootState === 'C' || bootState === 'D' || bootState === 'E' || isScrolling) && (
+                        {/* Shared Navbar for C, D, E, F */}
+                        {(bootState === 'C' || bootState === 'D' || bootState === 'E' || bootState === 'F' || isScrolling) && (
                             <div 
                                 ref={el => { if (el && navbarHeight === 0) setNavbarHeight(el.clientHeight); }}
                                 className="w-full flex justify-between items-center px-[4cqi] py-[1.5cqi] border-b border-[rgba(135,206,235,0.15)] animate-in fade-in slide-in-from-top-4 duration-700 relative z-20"
@@ -858,7 +870,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
                             )}
                             
                             {/* Dynamic Children Content (Featured Tickets, Speakers, Schedule, etc.) */}
-                            {typeof children === 'function' ? children({ scrollRef, isScrolling, bootState, nintendoIndex }) : children}
+                            {typeof children === 'function' ? children({ scrollRef, isScrolling, bootState, nintendoIndex, blackFade, screenHeight, navbarHeight }) : children}
                         </motion.div>
                         </div>
                     </div>

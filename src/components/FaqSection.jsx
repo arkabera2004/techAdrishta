@@ -75,11 +75,11 @@ export default function FaqSection({ isVisible, opacity, scrollContainerRef, isS
     const computedHeight = isBootMode && screenHeight && navbarHeight ? `${screenHeight - navbarHeight}px` : 'auto';
 
     return (
-        <section 
+        <section
             className="w-full flex-shrink-0 flex flex-col items-center animate-in fade-in duration-300 z-10"
-            style={{ 
-                display: !isScrolling && !isVisible ? 'none' : 'flex', 
-                opacity: blackFade ? 0 : opacity, 
+            style={{
+                display: !isScrolling && !isVisible ? 'none' : 'flex',
+                opacity: blackFade ? 0 : opacity,
                 transition: 'opacity 0.25s ease',
                 height: computedHeight,
                 padding: '1.5cqi 2cqi 1cqi 2cqi'
@@ -92,173 +92,173 @@ export default function FaqSection({ isVisible, opacity, scrollContainerRef, isS
                     borderRadius: '0.8cqi',
                     backgroundColor: '#060a14',
                     border: '1px solid #1e293b',
-                    padding: '1cqi 1.5cqi 0.5cqi 1.5cqi',
+                    padding: '1.1cqi 1.5cqi 0.5cqi 1.5cqi',
                     position: 'relative',
                     overflowY: isBootMode ? 'auto' : 'visible'
                 }}
             >
                 <div className="w-full flex flex-col" style={{ gap: '1cqi' }}>
-                
-                {/* Header Row (Sticky Navbar) */}
-                <div 
-                    className="flex justify-between items-start w-full mb-[1cqi]"
-                    style={{
-                        position: 'sticky',
-                        top: '-1px',
-                        zIndex: 10,
-                        backgroundColor: '#060a14',
-                        paddingTop: '0',
-                        marginTop: '0',
-                        paddingBottom: '0.5cqi',
-                        borderBottom: '1px solid #1f2937',
-                    }}
-                >
-                    {/* Left: Titles */}
-                    <div className="flex items-end" style={{ gap: '1cqi' }}>
-                        <img src="/question_bubble.png" alt="FAQ" className="object-contain" style={{ width: '3cqi', height: '3cqi', imageRendering: 'pixelated' }} />
-                        <div className="flex flex-col justify-end" style={{ paddingBottom: '0.2cqi' }}>
-                            <h2 style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '2cqi', color: 'white', lineHeight: 1, margin: 0, paddingBottom: '0.3cqi' }}>
-                                FAQ
-                            </h2>
-                            <div className="flex items-center" style={{ gap: '0.8cqi' }}>
-                                <span style={{ fontFamily: '"VT323", monospace', fontSize: '1.4cqi', color: '#d1d5db' }}>
-                                    Find answers to the most common questions.
-                                </span>
-                                {/* Small red sparkle */}
-                                <div style={{ width: '1cqi', height: '1cqi', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)' }} />
+
+                    {/* Header Row (Sticky Navbar) */}
+                    <div
+                        className="flex justify-between items-start w-full mb-[1cqi]"
+                        style={{
+                            position: 'sticky',
+                            top: '-1px',
+                            zIndex: 10,
+                            backgroundColor: '#060a14',
+                            paddingTop: '0',
+                            marginTop: '0',
+                            paddingBottom: '0.5cqi',
+                            borderBottom: '1px solid #1f2937',
+                        }}
+                    >
+                        {/* Left: Titles */}
+                        <div className="flex items-end" style={{ gap: '1cqi' }}>
+                            <img src="/question_bubble.png" alt="FAQ" className="object-contain" style={{ width: '3cqi', height: '3cqi', imageRendering: 'pixelated' }} />
+                            <div className="flex flex-col justify-end" style={{ paddingBottom: '0.2cqi' }}>
+                                <h2 style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '2cqi', color: 'white', lineHeight: 1, margin: 0, paddingBottom: '0.3cqi' }}>
+                                    FAQ
+                                </h2>
+                                <div className="flex items-center" style={{ gap: '0.8cqi' }}>
+                                    <span style={{ fontFamily: '"VT323", monospace', fontSize: '1.4cqi', color: '#d1d5db' }}>
+                                        Find answers to the most common questions.
+                                    </span>
+                                    {/* Small red sparkle */}
+                                    <div style={{ width: '1cqi', height: '1cqi', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)' }} />
+                                </div>
                             </div>
                         </div>
+
+                        {/* Right: Callout Box */}
+                        <ChamferBox
+                            className="cursor-pointer hover:scale-[1.02] transition-transform"
+                            borderColor="#ef4444"
+                            borderSize="1px"
+                            clipSize="0.8cqi"
+                            innerClassName="flex items-center"
+                            innerStyle={{ padding: '0.6cqi 0.8cqi', gap: '0.8cqi' }}
+                            onClick={() => window.location.href = 'mailto:support@adrishta.com'}
+                        >
+                            <Lightbulb style={{ width: '1.8cqi', height: '1.8cqi' }} color="#eab308" strokeWidth={1.5} />
+                            <div className="flex flex-col">
+                                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.65cqi', color: '#ef4444', marginBottom: '0.2cqi', lineHeight: '1.4' }}>
+                                    CAN'T FIND YOUR ANSWER?
+                                </span>
+                                <span style={{ fontFamily: '"VT323", monospace', fontSize: '1.1cqi', color: '#d1d5db', lineHeight: '1.2' }}>
+                                    Contact us and we'll<br />get back to you!
+                                </span>
+                            </div>
+                            <span style={{ color: '#ef4444', marginLeft: '1cqi', fontSize: '2cqi' }}>→</span>
+                        </ChamferBox>
                     </div>
 
-                    {/* Right: Callout Box */}
-                    <ChamferBox 
-                        className="cursor-pointer hover:scale-[1.02] transition-transform" 
-                        borderColor="#ef4444" 
-                        borderSize="1px" 
-                        clipSize="0.8cqi"
-                        innerClassName="flex items-center"
-                        innerStyle={{ padding: '0.8cqi 1cqi', gap: '1cqi' }}
-                        onClick={() => window.location.href = 'mailto:support@adrishta.com'}
-                    >
-                        <Lightbulb style={{ width: '2cqi', height: '2cqi' }} color="#eab308" strokeWidth={1.5} />
-                        <div className="flex flex-col">
-                            <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.65cqi', color: '#ef4444', marginBottom: '0.2cqi', lineHeight: '1.4' }}>
-                                CAN'T FIND YOUR ANSWER?
-                            </span>
-                            <span style={{ fontFamily: '"VT323", monospace', fontSize: '1.1cqi', color: '#d1d5db', lineHeight: '1.2' }}>
-                                Contact us and we'll<br/>get back to you!
-                            </span>
-                        </div>
-                        <span style={{ color: '#ef4444', marginLeft: '1cqi', fontSize: '2cqi' }}>→</span>
-                    </ChamferBox>
-                </div>
+                    {/* Decorative Sparkles between header and list */}
+                    <div className="flex justify-end gap-12 pr-32 pb-0 opacity-70">
+                        <div style={{ width: '4px', height: '4px', backgroundColor: '#ef4444' }} />
+                        <div style={{ width: '12px', height: '12px', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)', transform: 'translateY(-10px)' }} />
+                        <div style={{ width: '6px', height: '6px', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)', transform: 'translateY(15px)' }} />
+                    </div>
 
-                {/* Decorative Sparkles between header and list */}
-                <div className="flex justify-end gap-12 pr-32 pb-0 opacity-70">
-                    <div style={{ width: '4px', height: '4px', backgroundColor: '#ef4444' }} />
-                    <div style={{ width: '12px', height: '12px', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)', transform: 'translateY(-10px)' }} />
-                    <div style={{ width: '6px', height: '6px', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)', transform: 'translateY(15px)' }} />
-                </div>
+                    {/* FAQ List */}
+                    <div className="flex flex-col w-full" style={{ gap: '0.4cqi' }}>
+                        {faqData.map((item) => {
+                            const isActive = expandedRow === item.id;
+                            const borderColor = isActive ? '#ef4444' : '#374151'; // Red when active, gray otherwise
+                            const numColor = isActive ? '#ef4444' : '#d1d5db'; // Red when active, gray otherwise
+                            const IconComponent = item.icon;
 
-                {/* FAQ List */}
-                <div className="flex flex-col w-full" style={{ gap: '0.4cqi' }}>
-                    {faqData.map((item) => {
-                        const isActive = expandedRow === item.id;
-                        const borderColor = isActive ? '#ef4444' : '#374151'; // Red when active, gray otherwise
-                        const numColor = isActive ? '#ef4444' : '#d1d5db'; // Red when active, gray otherwise
-                        const IconComponent = item.icon;
-                        
-                        return (
-                            <ChamferBox 
-                                key={item.id}
-                                borderColor={borderColor}
-                                borderSize="1px"
-                                clipSize="8px"
-                                className="w-full cursor-pointer transition-all duration-300"
-                                innerClassName="flex flex-col w-full"
-                            >
-                                {/* Clickable Row */}
-                                <div 
-                                    className="w-full grid items-center"
-                                    style={{ gridTemplateColumns: '4cqi 4cqi 1fr 3cqi', gap: '1.5cqi', padding: '1cqi 2cqi' }}
-                                    onClick={() => toggleRow(item.id)}
+                            return (
+                                <ChamferBox
+                                    key={item.id}
+                                    borderColor={borderColor}
+                                    borderSize="1px"
+                                    clipSize="8px"
+                                    className="w-full cursor-pointer transition-all duration-300"
+                                    innerClassName="flex flex-col w-full"
                                 >
-                                    {/* Number */}
-                                    <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.8cqi', color: numColor, paddingTop: '0.2cqi' }}>
-                                        {item.id.toString().padStart(2, '0')}
-                                    </span>
-                                    
-                                    {/* Icon Container */}
-                                    <div className="flex items-center justify-center">
-                                        <IconComponent size={24} style={{ width: '2.5cqi', height: '2.5cqi' }} color={isActive ? '#ef4444' : item.color} strokeWidth={1.5} />
-                                    </div>
-                                    
-                                    {/* Question */}
-                                    <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.8cqi', color: 'white', lineHeight: '1.4' }}>
-                                        {item.question}
-                                    </span>
-                                    
-                                    {/* Toggle */}
-                                    <div className="flex items-center justify-end">
-                                        {isActive ? (
-                                            <Minus size={24} style={{ width: '2.5cqi', height: '2.5cqi' }} color="#ef4444" strokeWidth={2} />
-                                        ) : (
-                                            <Plus size={24} style={{ width: '2.5cqi', height: '2.5cqi' }} color="#ef4444" strokeWidth={2} />
-                                        )}
-                                    </div>
-                                </div>
-                                
-                                {/* Expanded Answer Content */}
-                                <div 
-                                    style={{ 
-                                        height: isActive ? 'auto' : 0, 
-                                        opacity: isActive ? 1 : 0,
-                                        overflow: 'hidden',
-                                        transition: 'all 0.3s ease-in-out'
-                                    }}
-                                >
-                                    <div 
-                                        className="w-full grid"
-                                        style={{ gridTemplateColumns: '4cqi 4cqi 1fr 3cqi', gap: '1.5cqi', padding: '0 2cqi 1.5cqi 2cqi' }}
+                                    {/* Clickable Row */}
+                                    <div
+                                        className="w-full grid items-center"
+                                        style={{ gridTemplateColumns: '3cqi 3cqi 1fr 2.5cqi', gap: '1cqi', padding: '0.5cqi 1cqi' }}
+                                        onClick={() => toggleRow(item.id)}
                                     >
-                                        <div /> {/* Empty col for Number */}
-                                        <div /> {/* Empty col for Icon */}
-                                        {/* Answer Text aligns perfectly with Question */}
-                                        <div style={{ fontFamily: '"VT323", monospace', fontSize: '1.6cqi', color: '#9ca3af', lineHeight: '1.4' }}>
-                                            {item.answer}
-                                        </div>
-                                        <div /> {/* Empty col for Toggle */}
-                                    </div>
-                                </div>
-                            </ChamferBox>
-                        );
-                    })}
-                </div>
+                                        {/* Number */}
+                                        <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.7cqi', color: numColor, paddingTop: '0.2cqi' }}>
+                                            {item.id.toString().padStart(2, '0')}
+                                        </span>
 
-                {/* Footer Dotted Divider */}
-                <div className="flex items-center justify-center w-full gap-4 cursor-pointer hover:opacity-80 transition-opacity" style={{ marginTop: '1cqi' }}>
-                    <div className="flex-1 h-[2px]" style={{ backgroundImage: 'linear-gradient(to right, #ef4444 20%, transparent 20%)', backgroundSize: '10px 100%' }} />
-                    <div className="flex items-center gap-3">
-                        {/* Star */}
-                        <div style={{ width: '8px', height: '8px', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)' }} />
-                        <span style={{ fontFamily: '"VT323", monospace', fontSize: '1.25rem', color: '#ef4444', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                            STILL HAVE QUESTIONS?
-                        </span>
-                        
-                        <div className="border border-red-500 rounded p-1 mx-1" style={{ borderColor: '#ef4444' }}>
-                            <Gamepad2 size={24} color="#ef4444" strokeWidth={1.5} />
-                        </div>
-                        
-                        <span style={{ fontFamily: '"VT323", monospace', fontSize: '1.25rem', color: '#ef4444', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                            REACH OUT TO US!
-                        </span>
-                        {/* Star */}
-                        <div style={{ width: '8px', height: '8px', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)' }} />
+                                        {/* Icon Container */}
+                                        <div className="flex items-center justify-center">
+                                            <IconComponent size={24} style={{ width: '1.8cqi', height: '1.8cqi' }} color={isActive ? '#ef4444' : item.color} strokeWidth={1.5} />
+                                        </div>
+
+                                        {/* Question */}
+                                        <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.75cqi', color: 'white', lineHeight: '1.2' }}>
+                                            {item.question}
+                                        </span>
+
+                                        {/* Toggle */}
+                                        <div className="flex items-center justify-end">
+                                            {isActive ? (
+                                                <Minus size={24} style={{ width: '1.8cqi', height: '1.8cqi' }} color="#ef4444" strokeWidth={2} />
+                                            ) : (
+                                                <Plus size={24} style={{ width: '1.8cqi', height: '1.8cqi' }} color="#ef4444" strokeWidth={2} />
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Expanded Answer Content */}
+                                    <div
+                                        style={{
+                                            height: isActive ? 'auto' : 0,
+                                            opacity: isActive ? 1 : 0,
+                                            overflow: 'hidden',
+                                            transition: 'all 0.3s ease-in-out'
+                                        }}
+                                    >
+                                        <div
+                                            className="w-full grid"
+                                            style={{ gridTemplateColumns: '3cqi 3cqi 1fr 2.5cqi', gap: '1cqi', padding: '0 1cqi 1cqi 1cqi' }}
+                                        >
+                                            <div /> {/* Empty col for Number */}
+                                            <div /> {/* Empty col for Icon */}
+                                            {/* Answer Text aligns perfectly with Question */}
+                                            <div style={{ fontFamily: '"VT323", monospace', fontSize: '1.6cqi', color: '#9ca3af', lineHeight: '1.4' }}>
+                                                {item.answer}
+                                            </div>
+                                            <div /> {/* Empty col for Toggle */}
+                                        </div>
+                                    </div>
+                                </ChamferBox>
+                            );
+                        })}
                     </div>
-                    <div className="flex-1 h-[2px]" style={{ backgroundImage: 'linear-gradient(to right, #ef4444 20%, transparent 20%)', backgroundSize: '10px 100%' }} />
+
+                    {/* Footer Dotted Divider */}
+                    <div className="flex items-center justify-center w-full gap-4 cursor-pointer hover:opacity-80 transition-opacity" style={{ marginTop: '1cqi' }}>
+                        <div className="flex-1 h-[2px]" style={{ backgroundImage: 'linear-gradient(to right, #ef4444 20%, transparent 20%)', backgroundSize: '10px 100%' }} />
+                        <div className="flex items-center gap-3">
+                            {/* Star */}
+                            <div style={{ width: '8px', height: '8px', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)' }} />
+                            <span style={{ fontFamily: '"VT323", monospace', fontSize: '1.25rem', color: '#ef4444', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                STILL HAVE QUESTIONS?
+                            </span>
+
+                            <div className="border border-red-500 rounded p-1 mx-1" style={{ borderColor: '#ef4444' }}>
+                                <Gamepad2 size={24} color="#ef4444" strokeWidth={1.5} />
+                            </div>
+
+                            <span style={{ fontFamily: '"VT323", monospace', fontSize: '1.25rem', color: '#ef4444', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                REACH OUT TO US!
+                            </span>
+                            {/* Star */}
+                            <div style={{ width: '8px', height: '8px', backgroundColor: '#ef4444', clipPath: 'polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%)' }} />
+                        </div>
+                        <div className="flex-1 h-[2px]" style={{ backgroundImage: 'linear-gradient(to right, #ef4444 20%, transparent 20%)', backgroundSize: '10px 100%' }} />
+                    </div>
+
                 </div>
-                
-            </div>
             </div>
         </section>
     );

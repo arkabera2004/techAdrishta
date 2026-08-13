@@ -103,7 +103,7 @@ const TedTalk = ({ isVisible, opacity, blackFade, screenHeight, navbarHeight }) 
                                 </div>
                                 <div className="flex flex-col items-center gap-[1.5cqi]">
                                     <img src="/ted-people.png" alt="Thought Leadership" style={{ width: '4cqi', height: '4cqi', imageRendering: 'pixelated' }} />
-                                    <span className="font-mono text-[#d1d5db] text-center" style={{ fontSize: '0.9cqi', lineHeight: '1.5' }}>Thought<br />Leadership</span>
+                                    <span className="font-mono text-[#d1d5db] text-center" style={{ fontSize: '0.9cqi', lineHeight: '1.5' }}>Leadership<br />Thought</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-[1.5cqi]">
                                     <img src="/ted-heart.png" alt="Real Impact" style={{ width: '4cqi', height: '4cqi', imageRendering: 'pixelated' }} />

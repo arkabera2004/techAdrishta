@@ -118,6 +118,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
         if (prefersReducedMotion || hasBooted) {
             const t = setTimeout(() => {
                 setBootState('D');
+                window.dispatchEvent(new Event('startBgMusic'));
             }, zoomOutDelay);
             return () => clearTimeout(t);
         }
@@ -134,6 +135,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
 
         const t3 = setTimeout(() => {
             setBootState('D');
+            window.dispatchEvent(new Event('startBgMusic'));
         }, zoomOutDelay + 400 + 800 + 600);
 
         return () => {
@@ -550,7 +552,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
 
                             <g filter="url(#buttonShadow)">
                                 {/* Minus Button */}
-                                <rect x="80" y="60" width="16" height="5" rx="1.5" fill={pressed === "minus" ? "#5a9ae6" : "#141415"} onPointerDown={() => press("minus")} style={{ cursor: "pointer" }} />
+                                <rect x="80" y="60" width="16" height="5" rx="1.5" fill={pressed === "minus" ? "#5a9ae6" : "#141415"} onPointerDown={() => press("minus", () => window.dispatchEvent(new CustomEvent('changeBgVolume', { detail: { change: -0.1 } })))} style={{ cursor: "pointer" }} />
                             </g>
                             <rect x="80" y="60" width="16" height="5" rx="1.5" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
 
@@ -585,7 +587,7 @@ export default function SwitchEventCard({ children, forceStateE = false, isZoomi
 
                             {/* Plus Button */}
                             <g filter="url(#buttonShadow)">
-                                <path d="M 922.5,62.5 h 5 v 5.5 h 5.5 v 5 h -5.5 v 5.5 h -5 v -5.5 h -5.5 v -5 h 5.5 z" fill={pressed === "plus" ? "#5a9ae6" : "#141415"} onPointerDown={() => press("plus")} style={{ cursor: "pointer" }} />
+                                <path d="M 922.5,62.5 h 5 v 5.5 h 5.5 v 5 h -5.5 v 5.5 h -5 v -5.5 h -5.5 v -5 h 5.5 z" fill={pressed === "plus" ? "#5a9ae6" : "#141415"} onPointerDown={() => press("plus", () => window.dispatchEvent(new CustomEvent('changeBgVolume', { detail: { change: 0.1 } })))} style={{ cursor: "pointer" }} />
                             </g>
                             <path d="M 922.5,62.5 h 5 v 5.5 h 5.5 v 5 h -5.5 v 5.5 h -5 v -5.5 h -5.5 v -5 h 5.5 z" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
 

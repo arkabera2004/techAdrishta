@@ -14,6 +14,43 @@ export default function App() {
   const footerRef = useRef(null);
   const [footerHeight, setFooterHeight] = useState(0);
 
+  const bgAudioRef = useRef(null);
+
+  useEffect(() => {
+    bgAudioRef.current = new Audio('/backgroundmusic.mp3');
+    bgAudioRef.current.loop = true;
+    bgAudioRef.current.volume = 0.1;
+
+    const handleStart = () => {
+      bgAudioRef.current.play().catch(e => console.log('Bg audio play failed:', e));
+    };
+
+    const handleChangeVolume = (e) => {
+      if (bgAudioRef.current) {
+        let newVol = bgAudioRef.current.volume + e.detail.change;
+        if (newVol > 1) newVol = 1;
+        if (newVol < 0) newVol = 0;
+        bgAudioRef.current.volume = newVol;
+        
+        // Force play if it was paused (e.g. autoplay was blocked)
+        if (bgAudioRef.current.paused) {
+          bgAudioRef.current.play().catch(e => console.log('Bg audio force play failed:', e));
+        }
+      }
+    };
+
+    window.addEventListener('startBgMusic', handleStart);
+    window.addEventListener('changeBgVolume', handleChangeVolume);
+
+    return () => {
+      window.removeEventListener('startBgMusic', handleStart);
+      window.removeEventListener('changeBgVolume', handleChangeVolume);
+      if (bgAudioRef.current) {
+        bgAudioRef.current.pause();
+      }
+    }
+  }, []);
+
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });

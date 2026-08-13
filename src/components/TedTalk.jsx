@@ -54,9 +54,9 @@ const TedTalk = ({ isVisible, opacity, blackFade, screenHeight, navbarHeight }) 
                     </div>
 
                     {/* Right Column */}
-                    <div className="flex flex-col flex-1" style={{ width: '60%', gap: '1.5cqi' }}>
+                    <div className="flex flex-col flex-1" style={{ width: '60%', gap: '1.2cqi' }}>
                         {/* 3 Info Boxes Row */}
-                        <div className="flex w-full justify-between gap-[1.2cqi]" style={{ marginTop: '2cqi' }}>
+                        <div className="flex w-full justify-between" style={{ gap: '1.5cqi', marginTop: '3cqi' }}>
                             {/* Date */}
                             <ChamferBox className="flex-1" innerClassName="flex items-center p-[1cqi] gap-[1cqi]">
                                 <img src="/ted-calendar.png" alt="Date" style={{ width: '2.5cqi', height: '2.5cqi', imageRendering: 'pixelated', marginLeft: '0.5cqi' }} />
@@ -88,7 +88,7 @@ const TedTalk = ({ isVisible, opacity, blackFade, screenHeight, navbarHeight }) 
 
                         {/* What to Expect */}
                         <ChamferBox className="w-full" innerClassName="flex flex-col w-full" innerStyle={{ padding: '2.2cqi' }}>
-                            <h4 className="m-0 p-0 text-[#eab308] text-left" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '1cqi', letterSpacing: '0.5px' }}>
+                            <h4 className="m-0 p-0 text-left" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '1cqi', letterSpacing: '0.5px', color: '#ffb800' }}>
                                 WHAT TO EXPECT <span style={{ marginLeft: '1cqi', letterSpacing: '-2px' }}>&lt;&lt;&lt;&lt;</span>
                             </h4>
 
